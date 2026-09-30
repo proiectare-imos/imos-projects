@@ -1,0 +1,1253 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IMOS Projects</title>
+<style>
+:root{--nav:#090909;--bg:#f5f5f5;--card:#fff;--ink:#111;--muted:#686868;--line:#e3e3e3;--blue:#d71920;--green:#d71920}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}
+aside{background:var(--nav);color:white;padding:28px 18px}.brand{font-size:20px;font-weight:800;padding:0 10px 28px}.brand span{color:#ef233c}
+.nav{font-size:13px;color:#9ca3af;margin:10px}.months button{display:block;width:100%;text-align:left;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:#cbd5e1;cursor:pointer;margin:3px 0;font-weight:600}
+.months button.active{background:#d71920;color:white}.year{padding:10px;color:#788397;font-size:12px;text-transform:uppercase;font-weight:700}
+main{padding:34px 42px;max-width:1250px;width:100%}.top{display:flex;justify-content:space-between;align-items:center}.top h1{margin:0;font-size:28px}.top p{margin:6px 0;color:var(--muted)}
+.primary{border:0;border-radius:10px;background:var(--blue);color:#fff;padding:11px 16px;font-weight:700;cursor:pointer}
+.cards{display:grid;grid-template-columns:1.65fr 1.15fr .8fr;gap:16px;margin:25px 0}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:22px 24px;min-width:0}
+.label{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase}.value{font-size:30px;font-weight:750;margin-top:10px;line-height:1.2;letter-spacing:.01em;font-variant-numeric:tabular-nums;white-space:nowrap}.green{color:var(--green)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}.panelhead{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.rate{font-size:13px;color:var(--muted)}.rate input{width:58px;padding:6px;border:1px solid var(--line);border-radius:7px;text-align:right}
+table{width:100%;border-collapse:collapse}th,td{padding:13px 18px;border-bottom:1px solid var(--line);text-align:left}th{font-size:12px;color:#111;text-transform:uppercase;background:#f0f0f0;font-weight:900;letter-spacing:.035em}
+input.cell{border:0;background:transparent;padding:7px;width:100%;font:inherit;font-weight:700;border-radius:6px}input.cell:focus{outline:1px solid #a9c3f5;background:#fff}.right{text-align:right}.remove{border:0;background:transparent;color:#b6bdc9;cursor:pointer;font-size:18px}
+.bottom{padding:17px 20px;display:flex;justify-content:space-between;align-items:center}.add{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;font-weight:700;cursor:pointer}.total{font-weight:800}
+.clip{border:1px solid #ddd;background:#fff;border-radius:7px;padding:7px 9px;font-size:11px;font-weight:800;cursor:pointer}
+.doclink{font-size:11px;font-weight:800;color:#d71920;cursor:pointer;max-width:125px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.docdel{border:0;background:none;color:#999;cursor:pointer;font-weight:900;margin-left:4px}
+@media(max-width:800px){.app{grid-template-columns:1fr}aside{display:none}main{padding:22px 14px}.cards{grid-template-columns:1fr}.top{align-items:flex-start}.top p{font-size:13px}th:nth-child(4),td:nth-child(4){display:none}}
+.clientHeader td{padding:20px 24px 9px!important;background:#fff;border-bottom:0!important}.clientHead{display:flex;justify-content:space-between;align-items:center;border-left:4px solid #df1720;padding-left:12px}.clientHead small{font-size:9px;color:#aaa;font-weight:900;letter-spacing:1px;margin-right:10px}.clientHead b{font-size:18px}.mini{margin-left:6px;border:1px solid #ddd;background:#fff;border-radius:7px;padding:6px 9px;font-size:10px;font-weight:800;cursor:pointer}.room{display:flex;align-items:center;gap:8px;padding-left:38px!important}.room>span{color:#df1720;font-weight:900}.room input{font-weight:750;color:#666;background:#fafafa}.noteInput{min-width:160px;border:1px solid #ddd;border-radius:7px;padding:8px}
+.projectsHead{display:grid;grid-template-columns:2.5fr 1.35fr 1fr 1.45fr 1.35fr 36px;gap:16px;padding:14px 22px;background:#efefef;font-size:12px;font-weight:900;align-items:center}
+.projectsHead>div:nth-child(2),.projectsHead>div:nth-child(3){text-align:right}
+.clientCards{padding:18px;background:#f4f4f5}
+.clientCard{background:#fff;border:1px solid #d9d9dc;border-radius:13px;overflow:hidden;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,.025)}
+.clientCard:last-child{margin-bottom:0}
+.clientCardHead{min-height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#f8f8f9;border-bottom:1px solid #e2e2e4}
+.clientTitle{border-left:4px solid #df1720;padding:5px 0 5px 12px;display:flex;align-items:baseline;gap:10px}
+.clientTitle span{font-size:9px;color:#999;font-weight:900;letter-spacing:1.1px}
+.clientTitle strong{font-size:18px;color:#111;font-weight:900}
+.clientButtons{display:flex;gap:6px}
+.roomGrid{display:grid;grid-template-columns:2.5fr 1.35fr 1fr 1.45fr 1.35fr 36px;gap:16px;align-items:center;padding:14px 18px;border-bottom:1px solid #ececef}
+.roomGrid:last-child{border-bottom:0}
+.roomName{display:flex;align-items:center;gap:9px;padding-left:10px}
+.roomName .arrow{font-size:17px;color:#df1720;font-weight:900}
+.roomName input{background:#f8f8f8;font-weight:750;color:#666}
+.roomValue{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.roomValue input{font-weight:850}
+.roomValue b{font-size:12px}
+.roomCommission{text-align:right;font-weight:850}
+.noteInput{width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 10px;font-size:11px}
+.docWrap{min-width:0}
+@media(max-width:1050px){
+ .projectsHead{display:none}
+ .roomGrid{grid-template-columns:1.6fr 1fr 1fr}
+ .roomGrid>div:nth-child(4),.roomGrid>div:nth-child(5){grid-column:auto}
+}
+
+
+/* Carduri client - contrast mai vizibil */
+.clientCards{background:#ededf0!important;padding:20px!important}
+.clientCard{
+  border:1px solid #c8c8cd!important;
+  box-shadow:0 3px 10px rgba(0,0,0,.07)!important;
+  margin-bottom:22px!important;
+}
+.clientCardHead{
+  background:#f1f1f3!important;
+  border-bottom:1px solid #d2d2d6!important;
+  min-height:68px!important;
+}
+.clientTitle{border-left-width:5px!important}
+.clientTitle strong{font-size:19px!important}
+.roomGrid{background:#fff!important}
+.roomGrid:hover{background:#fafafa!important}
+
+
+.loginScreen{position:fixed;inset:0;z-index:9999;background:#0a0a0a;display:flex;align-items:center;justify-content:center;padding:20px}
+.loginCard{width:min(410px,100%);background:#fff;border-radius:18px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+.loginBrand{font-size:27px;font-weight:900}.loginBrand span{color:#d71920}.loginPfa{font-size:11px;font-weight:800;color:#777;margin-top:5px;letter-spacing:.04em}
+.loginCard h2{margin:28px 0 6px}.loginCard p{margin:0 0 18px;color:#777;font-size:13px}
+.loginCard input{width:100%;padding:12px 13px;border:1px solid #d7d7d7;border-radius:9px;margin:6px 0;font:inherit}
+.loginBtn{width:100%;margin-top:9px}.authMsg{min-height:20px;margin-top:12px;font-size:12px;color:#b4232a;line-height:1.4}
+.loadingScreen{position:fixed;inset:0;z-index:9998;background:rgba(255,255,255,.94);display:none;align-items:center;justify-content:center;gap:12px}
+.spinner{width:22px;height:22px;border:3px solid #ddd;border-top-color:#d71920;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}#app{display:none}
+
+
+/* ===== MOBILE FIX 2026-09 ===== */
+@media (max-width: 800px){
+  main{padding:18px 10px}
+  .top{gap:12px;flex-direction:column}
+  .top>div:last-child{width:100%}
+  .top>div:last-child button{flex:1}
+
+  .card{padding:20px}
+  #targetBox{padding:16px 14px!important}
+  #targetBox>div{display:block!important}
+  #targetBox>div>div:first-child{margin-bottom:14px}
+  #targetText{font-size:16px!important;line-height:1.2}
+  #targetBox>div>div:last-child{min-width:0!important;max-width:none!important;width:100%}
+
+  .panelhead{padding:16px 14px;gap:10px}
+  .clientCards{padding:12px!important}
+  .clientCard{margin-bottom:16px!important}
+  .clientCardHead{padding:12px 14px;min-height:72px!important}
+  .clientTitle{min-width:0;align-items:flex-start}
+  .clientTitle strong{font-size:17px!important;line-height:1.08;overflow-wrap:anywhere}
+  .clientButtons{flex-shrink:0}
+  .mini{padding:7px 9px}
+
+  .roomGrid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(118px,.72fr)!important;
+    gap:10px 12px!important;
+    padding:14px!important;
+    align-items:center!important;
+  }
+  .roomGrid>div{min-width:0}
+  .roomName{grid-column:1 / -1;padding-left:0}
+  .roomName input{font-size:16px;min-width:0}
+
+  .roomValue{
+    grid-column:1;
+    justify-content:flex-start!important;
+    border:1px solid #e3e3e3;
+    border-radius:9px;
+    padding:4px 8px;
+    min-width:0;
+  }
+  .roomValue input{
+    width:100%!important;
+    min-width:0!important;
+    text-align:right!important;
+    font-size:16px;
+    padding:7px 3px;
+  }
+  .roomValue b{flex:0 0 auto;white-space:nowrap}
+
+  .roomCommission{
+    grid-column:2;
+    text-align:right!important;
+    font-size:17px;
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:visible;
+  }
+
+  .roomGrid>div:nth-child(4){grid-column:1}
+  .roomGrid>div:nth-child(5){grid-column:2}
+  .noteInput{min-width:0;width:100%;font-size:13px}
+  .docWrap{min-width:0}
+  .doclink{max-width:100%;font-size:11px}
+  .clip{width:100%;min-height:40px}
+  .roomGrid>div:nth-child(6){
+    grid-column:1 / -1;
+    justify-self:end;
+    margin-top:-4px;
+  }
+  .remove{padding:5px 10px}
+
+  .bottom{padding:14px;gap:12px;align-items:flex-start}
+  .bottom .total{text-align:right;font-size:13px}
+
+  #chart{gap:5px!important}
+  #chartLabels{gap:5px!important}
+}
+
+@media (max-width: 430px){
+  .clientCardHead{gap:8px}
+  .clientTitle span{display:none}
+  .clientTitle strong{font-size:16px!important}
+  .clientButtons{gap:4px}
+  .mini{font-size:9px;padding:7px}
+  .roomGrid{grid-template-columns:minmax(0,1fr) minmax(112px,.78fr)!important;gap:9px!important}
+  .roomCommission{font-size:16px}
+  .roomValue input{font-size:15px}
+}
+
+
+/* ===== SELECTOR LUNI PE MOBIL ===== */
+.mobileMonthPicker{display:none}
+@media (max-width:800px){
+  .mobileMonthPicker{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 14px;
+    padding:10px 12px;
+    background:#090909;
+    border-radius:12px;
+  }
+  .mobileMonthPicker label{
+    color:#aaa;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .mobileMonthPicker select{
+    flex:1;
+    min-width:0;
+    border:1px solid #333;
+    border-radius:9px;
+    background:#171717;
+    color:#fff;
+    padding:10px 12px;
+    font:700 14px Arial,sans-serif;
+    outline:none;
+  }
+  .mobileMonthPicker select:focus{border-color:#e21b23}
+}
+
+
+/* ===== MOBILE MONTH MENU FIX ===== */
+@media (max-width:800px){
+  .mobileMonthPicker{
+    display:block!important;
+    position:relative;
+    margin:0 0 14px;
+    padding:0!important;
+    background:transparent!important;
+    z-index:1000;
+  }
+  .mobileMonthBtn{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border:0;
+    border-radius:12px;
+    padding:13px 15px;
+    background:#090909;
+    color:#fff;
+    font:800 15px Arial,sans-serif;
+    cursor:pointer;
+  }
+  .mobileMonthBtn span{color:#e21b23}
+  .mobileMonthMenu{
+    display:none;
+    position:absolute;
+    left:0; right:0; top:calc(100% + 6px);
+    max-height:330px;
+    overflow-y:auto;
+    background:#0b0b0b;
+    border:1px solid #333;
+    border-radius:12px;
+    box-shadow:0 12px 30px rgba(0,0,0,.3);
+    padding:6px;
+    z-index:99999;
+  }
+  .mobileMonthMenu.open{display:block}
+  .mobileMonthOption{
+    display:block;
+    width:100%;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:#fff;
+    padding:11px 12px;
+    text-align:left;
+    font:700 14px Arial,sans-serif;
+    cursor:pointer;
+  }
+  .mobileMonthOption.active{background:#e21b23}
+}
+
+
+/* COLABORATOR + TIP PLATA */
+.collabInput,.payBox select,.payBox input{border:1px solid #e3e3e3;border-radius:8px;background:#fff;padding:7px 8px;font:700 12px Arial;min-width:0}
+.collabInput{width:100%}.payBox{display:flex;gap:6px;align-items:center}.payBox select{width:92px}.payBox input{width:78px;text-align:right}.paySuffix{font-size:11px;font-weight:800;white-space:nowrap;color:#555}
+@media(max-width:800px){.roomGrid .collabCell,.roomGrid .payCell{grid-column:1 / -1}.payBox select{width:105px}.payBox input{flex:1;width:auto}}
+
+
+/* ===== FIX OBSERVATII + DOCUMENTE DUPA ADAUGARE COLABORATOR ===== */
+@media (max-width:800px){
+  /* New order:
+     1 roomName, 2 collaborator, 3 payment, 4 value, 5 commission,
+     6 observations, 7 documents, 8 delete */
+  .roomGrid>div:nth-child(4){
+    grid-column:1!important;
+  }
+  .roomGrid>div:nth-child(5){
+    grid-column:2!important;
+  }
+  .roomGrid>div:nth-child(6){
+    grid-column:1!important;
+    justify-self:stretch!important;
+    margin-top:0!important;
+  }
+  .roomGrid>div:nth-child(7){
+    grid-column:2!important;
+    min-width:0!important;
+  }
+  .roomGrid>div:nth-child(8){
+    grid-column:1 / -1!important;
+    justify-self:end!important;
+    margin-top:-4px!important;
+  }
+  .noteInput{
+    display:block!important;
+    visibility:visible!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+}
+
+
+/* ===== LAYOUT V2: OBSERVATII VIZIBILE CLAR ===== */
+.mobileFieldLabel{display:none}
+@media (min-width:801px){
+  .roomGrid{
+    grid-template-columns:2fr 1.25fr 1.15fr 1fr 1fr 1.4fr 1.15fr 36px!important;
+    gap:10px!important;
+  }
+  .notesCell,.docWrap,.removeCell{min-width:0}
+}
+@media (max-width:800px){
+  .roomGrid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(112px,.72fr)!important;
+    gap:10px 12px!important;
+  }
+  .roomName{grid-column:1 / -1!important}
+  .collabCell{grid-column:1 / -1!important}
+  .payCell{grid-column:1 / -1!important}
+  .roomValue{grid-column:1!important}
+  .roomCommission{grid-column:2!important}
+  .notesCell{
+    grid-column:1 / -1!important;
+    display:block!important;
+    width:100%!important;
+    margin-top:3px!important;
+  }
+  .docWrap{
+    grid-column:1 / -1!important;
+    display:block!important;
+    width:100%!important;
+  }
+  .removeCell{
+    grid-column:1 / -1!important;
+    justify-self:end!important;
+  }
+  .mobileFieldLabel{
+    display:block!important;
+    margin:0 0 5px 2px;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.7px;
+    color:#888;
+  }
+  .noteInput{
+    display:block!important;
+    width:100%!important;
+    min-height:42px!important;
+    padding:11px 10px!important;
+    font-size:13px!important;
+    box-sizing:border-box!important;
+  }
+}
+
+
+/* ===== FACTURARE PE COLABORATOR ===== */
+.invoicePanel{margin-top:18px}
+.invoiceList{padding:16px 18px}
+.invoiceEmpty{color:#777;font-size:13px;padding:8px 2px}
+.invoiceRow{display:grid;grid-template-columns:minmax(150px,1.4fr) 1fr auto;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid #ececef}
+.invoiceRow:last-child{border-bottom:0}
+.invoiceName{font-weight:900;font-size:15px}.invoiceMeta{font-size:11px;color:#777;margin-top:3px}
+.invoiceAmount{text-align:right;font-weight:900;font-size:18px;color:#15966a;white-space:nowrap}
+.invoiceActions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.invoiceHint{padding:0 18px 16px;color:#777;font-size:11px}
+@media(max-width:800px){
+ .invoiceList{padding:10px 14px}
+ .invoiceRow{grid-template-columns:1fr auto;gap:8px 10px}
+ .invoiceActions{grid-column:1 / -1;justify-content:stretch}
+ .invoiceActions button{flex:1}
+}
+
+
+/* ===== DESKTOP COLUMNS FIX ===== */
+@media (min-width:801px){
+  .tableHead{
+    display:grid!important;
+    grid-template-columns:2fr 1.25fr 1.15fr 1fr 1fr 1fr 1.4fr 1.15fr 36px!important;
+    gap:10px!important;
+    padding:0 24px!important;
+    align-items:end!important;
+  }
+  .tableHead>div{
+    min-width:0!important;
+    font-size:10px!important;
+    line-height:1.15!important;
+    white-space:normal!important;
+  }
+  .roomGrid{
+    grid-template-columns:2fr 1.25fr 1.15fr 1fr 1fr 1fr 1.4fr 1.15fr 36px!important;
+    gap:10px!important;
+  }
+  .roomName,.collabCell,.payCell,.roomValue,.roomCommission,.notesCell,.docWrap,.removeCell{
+    grid-column:auto!important;
+  }
+}
+
+
+/* ===== ALINIERE COLOANE DESKTOP - 8 COLOANE REALE ===== */
+@media (min-width:1051px){
+  .projectsHead{
+    display:grid!important;
+    grid-template-columns:2fr 1.15fr 1.45fr 1fr 1fr 1.35fr 1.1fr 36px!important;
+    gap:12px!important;
+    padding:17px 18px!important;
+    align-items:end!important;
+  }
+  .projectsHead>div{
+    min-width:0!important;
+    font-size:10px!important;
+    line-height:1.15!important;
+    white-space:normal!important;
+  }
+  .roomGrid{
+    display:grid!important;
+    grid-template-columns:2fr 1.15fr 1.45fr 1fr 1fr 1.35fr 1.1fr 36px!important;
+    gap:12px!important;
+    padding:14px 18px!important;
+    align-items:center!important;
+  }
+  .roomName,.collabCell,.payCell,.roomValue,.roomCommission,.notesCell,.docWrap,.removeCell{
+    grid-column:auto!important;
+    min-width:0!important;
+  }
+  .payBox{width:100%!important}
+  .payBox select{width:100px!important}
+  .payBox input{width:54px!important}
+}
+
+
+/* FINAL DESKTOP HEADER/ROW ALIGNMENT */
+@media (min-width:1051px){
+  .colheads{
+    display:grid!important;
+    grid-template-columns:2fr 1.15fr 1.45fr 1fr 1fr 1fr 1.35fr 1.1fr 36px!important;
+    gap:12px!important;
+    padding:17px 18px!important;
+    align-items:end!important;
+  }
+  .colheads>div{min-width:0;font-size:10px;line-height:1.1;white-space:normal}
+  .roomGrid{
+    display:grid!important;
+    grid-template-columns:2fr 1.15fr 1.45fr 1fr 1fr 1fr 1.35fr 1.1fr 36px!important;
+    gap:12px!important;
+    padding:14px 18px!important;
+    align-items:center!important;
+  }
+}
+
+
+/* ===== FINAL: HEADER SI RAND PE ACEEASI GRILA ===== */
+@media (min-width:1051px){
+  .colheads,
+  .roomGrid{
+    grid-template-columns:
+      minmax(190px,2fr)
+      minmax(105px,1.05fr)
+      minmax(140px,1.35fr)
+      minmax(120px,1.05fr)
+      minmax(115px,1fr)
+      minmax(150px,1.35fr)
+      minmax(125px,1.15fr)
+      36px!important;
+    column-gap:12px!important;
+    box-sizing:border-box!important;
+  }
+  .colheads{
+    display:grid!important;
+    padding:17px 28px 17px 48px!important;
+  }
+  .roomGrid{
+    display:grid!important;
+    padding:14px 28px 14px 48px!important;
+  }
+
+  /* payment type + percent live together in one cell */
+  .payCell{min-width:0!important}
+  .payBox{display:flex!important;width:100%!important;gap:6px!important}
+  .payBox select{flex:1 1 auto!important;width:auto!important;min-width:0!important}
+  .payBox input{flex:0 0 54px!important;width:54px!important}
+
+  .roomValue,.roomCommission{min-width:0!important}
+  .notesCell,.docWrap{min-width:0!important}
+}
+
+
+/* Created by signature */
+aside{display:flex;flex-direction:column;min-height:100vh}
+.createdBy{margin-top:auto;padding:22px 10px 4px;color:#777;font-size:10px;line-height:1.35;letter-spacing:.02em}
+.createdBy strong{display:block;color:#c7cbd1;font-size:11px;font-weight:800;margin-top:2px}
+
+/* ===== UI compact + finalizare luna ===== */
+@media (min-width:801px){
+  .clientTitle strong{font-size:16px!important}
+  .roomName input{font-size:16px!important}
+}
+.roomName .arrow{font-size:0!important;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px}
+.roomName .arrow::before{content:"⌂";font-size:25px;line-height:1;color:#df1720;font-weight:900}
+.finalizeBtn{border:0;border-radius:9px;background:#111;color:#fff;padding:10px 14px;font-weight:900;cursor:pointer;margin-right:12px}
+.finalizeBtn.done{background:#168b64}
+.monthFinalized{font-size:11px;font-weight:900;color:#168b64;margin-left:8px}
+.monthLocked .clientRooms input,.monthLocked .clientRooms select,.monthLocked .clientRooms button,.monthLocked .clientButtons button,.monthLocked .add{pointer-events:none;opacity:.62}
+.monthLocked .doclink{pointer-events:none;opacity:.7}
+@media(max-width:800px){.clientTitle strong{font-size:18px!important}.roomName input{font-size:16px!important}.finalizeBtn{margin:0 0 8px 0;width:100%}}
+
+/* v15 - aliniere TIP PLATA cu dropdown-ul Proc pe desktop */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(3){text-align:left!important;transform:none!important;}
+}
+
+/* v16.1 - reglaj fin COLABORATOR / TIP PLATA pe desktop */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(2){transform:translateX(-12px)!important;}
+  .projectsHead > div:nth-child(3){transform:translateX(10px)!important;}
+}
+
+/* v16.2 FINAL - colaborator putin mai spre stanga pe desktop */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(2){transform:translateX(-12px)!important;}
+  .roomGrid .collabCell{transform:translateX(-12px)!important;}
+}
+
+</style>
+<style>
+/* v16.3 FINAL - mutare COLABORATOR spre stanga */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(2){
+    transform:translateX(-22px)!important;
+  }
+  .roomGrid .collabCell{
+    transform:translateX(-22px)!important;
+  }
+}
+</style>
+
+
+<style>
+/* v16.4 FINAL - COLABORATOR mai spre stanga */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(2){
+    transform:translateX(-42px)!important;
+  }
+  .roomGrid .collabCell{
+    transform:translateX(-42px)!important;
+  }
+}
+</style>
+
+
+<style>
+/* v16.5 - comparatie lunara + diferenta pana la tinta */
+.monthCompare{margin:-8px 0 20px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.monthCompareMain{font-size:15px;font-weight:850;margin-top:5px}
+.monthComparePct{font-size:22px;font-weight:900;white-space:nowrap}
+.targetGap{display:block;margin-top:4px;font-size:12px;font-weight:800}
+@media(max-width:800px){.monthCompare{padding:15px 14px}.monthComparePct{font-size:19px}}
+</style>
+
+
+<style>
+/* v16.6 - reglaj final: doar titlul COLABORATOR putin mai la stanga */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(2){
+    transform:translateX(-62px)!important;
+  }
+}
+
+/* v16.9 - lucrari in curs globale, finalizare in luna selectata */
+.statusBtn{border:1px solid #ddd;background:#fff;border-radius:8px;padding:7px 8px;font-size:10px;font-weight:900;cursor:pointer;white-space:nowrap}
+.statusBtn.pending{background:#fff7e6;border-color:#efc46b;color:#9a6200}
+.pendingSummary{margin:18px 0 0;background:#fffaf0;border:1px solid #efd39b;border-left:5px solid #e59b16;border-radius:14px;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.pendingSummary strong{font-size:15px}.pendingNumbers{font-weight:900;text-align:right}.pendingNumbers span{color:#b46f00}
+.pendingNet{display:block;margin-top:5px;font-size:12px;color:#555}.pendingNet b{color:#168b64;font-size:14px}
+.roomName input{min-width:0;cursor:text}
+@media(min-width:1051px){.roomName{position:relative}.roomName input:focus{position:relative;z-index:30;width:clamp(260px,32vw,520px)!important;min-width:260px!important;background:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.16);outline:1px solid #bbb!important}}
+@media(max-width:800px){.pendingSummary{align-items:flex-start;flex-direction:column}.pendingNumbers{text-align:left}.statusCell{grid-column:1 / -1!important}.statusBtn{width:100%;min-height:38px}}
+@media(min-width:1051px){.projectsHead,.roomGrid{grid-template-columns:minmax(175px,1.75fr) minmax(95px,1fr) minmax(130px,1.25fr) minmax(105px,.9fr) minmax(110px,.95fr) minmax(125px,1.15fr) minmax(105px,1fr) minmax(78px,.7fr) 32px!important}.projectsHead{padding-left:38px!important}.roomGrid{padding-left:38px!important}.statusCell{min-width:0}}
+</style>
+
+</head>
+<body>
+<div id="loginScreen" class="loginScreen">
+  <div class="loginCard">
+    <div class="loginBrand"><span>IMOS</span> Projects</div>
+    <div class="loginPfa">MICLERU GEORGE PFA</div>
+    <h2>Autentificare</h2>
+    <p>Proiectele și documentele sunt salvate online.</p>
+    <input id="loginEmail" type="email" placeholder="Email" autocomplete="email">
+    <input id="loginPassword" type="password" placeholder="Parolă" autocomplete="current-password">
+    <button class="primary loginBtn" onclick="login()">Intră în aplicație</button>
+    <button class="add loginBtn" onclick="signup()">Creează cont</button>
+    <div id="authMsg" class="authMsg"></div>
+  </div>
+</div>
+<div id="loadingScreen" class="loadingScreen"><div class="spinner"></div><b>Se încarcă IMOS Projects…</b></div>
+<div class="app" id="app">
+<aside><div class="brand"><span>IMOS</span> Projects<div style="font-size:12px;font-weight:700;color:#c7cbd1;margin-top:7px;letter-spacing:.02em">MICLERU GEORGE PFA</div></div><div class="nav">REGISTRU LUNAR</div><div class="year">2026</div><div class="months" id="months"></div><div class="createdBy">Created by<strong>George Micleru</strong></div></aside>
+<main>
+<div class="mobileMonthPicker">
+      <button type="button" id="mobileMonthBtn" class="mobileMonthBtn">Septembrie 2026 <span>▼</span></button>
+      <div id="mobileMonthMenu" class="mobileMonthMenu"></div>
+    </div>
+    <div class="top"><div><h1 id="title">Septembrie 2026</h1><p>Centralizare clienți, încăperi și calcul comision</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="add" onclick="exportCSV()">Export CSV</button>
+<button class="add" onclick="exportPDF()">Export PDF</button>
+<button class="primary" onclick="add()">+ Client nou</button>
+</div></div>
+<div id="cloudBar" style="margin:0 0 18px;padding:11px 14px;border-radius:10px;background:#f4fff8;border:1px solid #b9dfc7;font-size:12px;color:#245c38;display:flex;justify-content:space-between;align-items:center;gap:12px">
+  <div><b>☁ Online:</b> <span id="cloudStatus">conectat la Supabase</span></div>
+  <div style="display:flex;align-items:center;gap:10px"><span id="userEmail" style="color:#666"></span><button class="add" onclick="logout()">Ieșire</button></div>
+</div><div class="cards">
+<div class="card"><div class="label">Valoare lucrări</div><div class="value" id="work">0 lei</div></div>
+<div class="card"><div class="label">De facturat</div><div class="value green" id="bill">0 lei</div></div>
+<div class="card"><div class="label">Proiecte cu valoare</div><div class="value" id="nr">0</div></div>
+</div>
+<div id="targetBox" style="margin:-8px 0 20px;background:white;border:1px solid var(--line);border-radius:14px;padding:16px 20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
+    <div>
+      <div class="label">Țintă lunară · 350.000 lei</div>
+      <div id="targetText" style="font-size:17px;font-weight:900;margin-top:5px">—</div>
+    </div>
+    <div style="min-width:280px;flex:1;max-width:520px">
+      <div style="height:12px;background:#ececec;border-radius:20px;overflow:hidden">
+        <div id="targetBar" style="height:100%;width:0%;border-radius:20px;transition:.25s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;color:#777;margin-top:6px">
+        <span>0</span><span>300.000</span><span>350.000</span><span>400.000 lei</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="monthCompare" class="monthCompare">
+  <div>
+    <div class="label">COMPARAȚIE CU LUNA TRECUTĂ</div>
+    <div id="monthCompareText" class="monthCompareMain">—</div>
+  </div>
+  <div id="monthComparePct" class="monthComparePct">—</div>
+</div>
+
+<div class="panel"><div class="panelhead"><strong>Lucrările lunii</strong><div class="rate">Procent standard <input id="rate" type="number" step=".1" value="5" oninput="save();render()"> %</div></div>
+<div class="projectsHead">
+  <div>ÎNCĂPERE</div>
+  <div>COLABORATOR</div>
+  <div>TIP PLATĂ</div>
+  <div>VALOARE LUCRARE</div>
+  <div>DE FACTURAT</div>
+  <div>OBSERVAȚII</div>
+  <div>DOCUMENT</div>
+  <div>STATUS</div>
+  <div></div>
+</div>
+<div id="body" class="clientCards"></div>
+<div class="bottom"><button class="add" onclick="add()">＋ Client nou</button><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="finalizeMonthBtn" class="finalizeBtn" onclick="toggleFinalizeMonth()">✓ Finalizează luna</button><div class="total">Total de facturat: <span class="green" id="bill2">0 lei</span></div></div></div></div>
+<div id="pendingSummary" class="pendingSummary"><div><strong>Lucrări în curs</strong><div style="font-size:11px;color:#777;margin-top:3px">Rămân aici indiferent de lună. Când le finalizezi, intră în luna selectată atunci. Nu intră în total, țintă, facturare sau PDF cât sunt în curs.</div></div><div class="pendingNumbers">Valoare: <span id="pendingWork">0 lei</span> · De facturat: <span id="pendingBill">0 lei</span><span class="pendingNet">Bani în mână estimat: <b id="pendingNet">0 lei</b></span></div></div>
+
+<div class="panel invoicePanel">
+  <div class="panelhead">
+    <div><strong>Facturare</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Total de facturat pe colaborator în luna selectată</div></div>
+  </div>
+  <div id="invoiceList" class="invoiceList"></div>
+  <div class="invoiceHint">Textul pentru factură include automat luna selectată.</div>
+</div>
+
+<div class="panel" style="margin-top:18px">
+  <div class="panelhead">
+    <div><strong>Evoluție anuală</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Suma de facturat pe fiecare lună</div></div>
+    <strong style="color:var(--blue)">2026</strong>
+  </div>
+  <div style="padding:24px 22px 18px">
+    <div id="chart" style="height:260px;display:flex;align-items:flex-end;gap:10px;border-bottom:2px solid #111;padding:10px 5px 0"></div>
+    <div id="chartLabels" style="display:flex;gap:10px;padding:8px 5px 0"></div>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:18px">
+  <div class="panelhead">
+    <div><strong>Cât îmi rămâne în mână</strong>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Estimare rapidă pornind de la comisionul lunii selectate</div>
+    </div>
+    <strong style="color:var(--blue)">MICLERU GEORGE PFA</strong>
+  </div>
+  <div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+    <div class="card" style="padding:17px"><div class="label">Comision brut</div><div class="value" id="grossHand" style="font-size:24px">0 lei</div></div>
+    <div class="card" style="padding:17px"><div class="label">Taxe estimate</div><div class="value" id="taxHand" style="font-size:24px">0 lei</div></div>
+    <div class="card" style="padding:17px;border:2px solid #d71920"><div class="label">Bani în mână</div><div class="value green" id="netHand" style="font-size:24px">0 lei</div></div>
+  </div>
+  <div style="padding:0 20px 18px;font-size:12px;color:#777">Estimare orientativă: presupune că venitul lunar selectat se menține aproximativ la același nivel pe parcursul anului.</div>
+</div>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://invtioenqiwrjnxghqqs.supabase.co";
+const SUPABASE_KEY="sb_publishable_iUsHfykagLOWZ6SLi4wVrg_Fzank8lI";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const names=["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"];
+const seed=[["Dobrota 801A","Bucătărie",15944],["Cristache Camelia","Living",55498],["Visa","Living",27798],["Moscalu","Corp baie",2311],["Synapse","Dormitor",40429],["MOCIOI","Comodă living",8834],["MIHAILA","Bucătărie",43642],["HERA","Living",0],["HERA","Dorm. matrimonial",0],["HERA","Dorm. copil",0],["HERA","Hol",0]];
+const YEAR=2026, BUCKET="Documents";
+let month=8, data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={};
+function finalKey(){return `imos_final_${user?.id||"local"}_${YEAR}_${month+1}`}
+function isMonthFinalized(){return localStorage.getItem(finalKey())==="1"}
+function updateFinalizeUI(){
+  const done=isMonthFinalized(), btn=document.getElementById("finalizeMonthBtn"), panel=document.querySelector(".panel");
+  if(btn){btn.textContent=done?"✓ Lună finalizată · Redeschide":"✓ Finalizează luna";btn.classList.toggle("done",done)}
+  if(panel)panel.classList.toggle("monthLocked",done);
+}
+function toggleFinalizeMonth(){
+  const done=isMonthFinalized();
+  if(done){if(!confirm(`Redeschizi luna ${names[month]} ${YEAR}?`))return;localStorage.removeItem(finalKey())}
+  else{if(!confirm(`Finalizezi luna ${names[month]} ${YEAR}? Lucrările vor fi blocate până când redeschizi luna.`))return;localStorage.setItem(finalKey(),"1")}
+  render();
+}
+function guardFinalized(){if(isMonthFinalized()){alert("Luna este finalizată. Apasă «Redeschide» pentru a face modificări.");return true}return false}
+
+const fmt=n=>new Intl.NumberFormat("ro-RO",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0)+" lei";
+const esc=x=>String(x??"").replaceAll("&","&amp;").replaceAll('"',"&quot;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function setLoading(v){loadingScreen.style.display=v?"flex":"none"}
+function setCloud(msg,bad=false){if(!document.getElementById("cloudStatus"))return;cloudStatus.textContent=msg;cloudStatus.style.color=bad?"#b4232a":"#245c38"}
+
+async function login(){
+  authMsg.textContent="";
+  const email=loginEmail.value.trim(), password=loginPassword.value;
+  if(!email||!password){authMsg.textContent="Completează emailul și parola.";return}
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(error) authMsg.textContent=error.message;
+}
+async function signup(){
+  authMsg.textContent="";
+  const email=loginEmail.value.trim(), password=loginPassword.value;
+  if(!email||password.length<6){authMsg.textContent="Introdu un email și o parolă de minimum 6 caractere.";return}
+  const {data:res,error}=await sb.auth.signUp({email,password});
+  if(error){authMsg.textContent=error.message;return}
+  authMsg.style.color="#247044";
+  authMsg.textContent=res.session?"Cont creat. Se deschide aplicația…":"Cont creat. Verifică emailul și confirmă contul, apoi autentifică-te.";
+}
+async function logout(){await sb.auth.signOut()}
+async function boot(session){
+  user=session?.user||null;
+  if(!user){
+    app.style.display="none"; loginScreen.style.display="flex"; loadingScreen.style.display="none"; return;
+  }
+  loginScreen.style.display="none"; app.style.display="grid"; setLoading(true);
+  userEmail.textContent=user.email||"";
+  await ensureSeed();
+  await refreshAll();
+  setLoading(false);
+}
+sb.auth.onAuthStateChange((event,session)=>{setTimeout(()=>boot(session),0)});
+(async()=>{const {data:{session}}=await sb.auth.getSession();await boot(session)})();
+
+async function ensureSeed(){
+  const {count,error}=await sb.from("rooms").select("*",{count:"exact",head:true});
+  if(error||count!==0)return;
+  const unique=[...new Set(seed.map(x=>x[0]))], map={};
+  for(const name of unique){
+    const {data:c,error:e}=await sb.from("clients").insert({user_id:user.id,name}).select().single();
+    if(e){console.error(e);return} map[name]=c.id;
+  }
+  const rows=seed.map(r=>({user_id:user.id,client_id:map[r[0]],year:YEAR,month:9,room_name:r[1],work_value:r[2],commission_rate:5,notes:null}));
+  await sb.from("rooms").insert(rows);
+}
+async function refreshAll(){
+  setCloud("se sincronizează…");
+  const [{data:cs,error:ce},{data:rs,error:re},{data:ds,error:de}]=await Promise.all([
+    sb.from("clients").select("*").order("created_at"),
+    sb.from("rooms").select("*").eq("year",YEAR).order("created_at"),
+    sb.from("documents").select("*").order("created_at")
+  ]);
+  if(ce||re||de){setCloud("eroare la sincronizare",true);console.error(ce||re||de);return}
+  clientsById=Object.fromEntries((cs||[]).map(c=>[c.id,c]));
+  allRooms=rs||[];
+  docsByRoom={}; (ds||[]).forEach(d=>(docsByRoom[d.room_id]??=[]).push(d));
+  loadMonth(); setCloud("salvat online");
+}
+function loadMonth(){
+  const m=month+1;
+  // Lucrările finalizate apar doar în luna lor; lucrările ÎN CURS apar în orice lună selectată.
+  const rooms=allRooms.filter(r=>r.month===m || String(r.notes||"").startsWith("[[IN_PROGRESS]]"));
+  const monthRooms=allRooms.filter(r=>r.month===m);
+  rate=monthRooms.length?Number(monthRooms[0].commission_rate)||5:5;
+  rateEl().value=rate;
+  data=rooms.map(r=>{const rawNote=r.notes||"", pending=rawNote.startsWith("[[IN_PROGRESS]]"); return {id:r.id,client_id:r.client_id,client:clientsById[r.client_id]?.name||"Client",room:r.room_name||"",value:Number(r.work_value)||0,note:pending?rawNote.replace(/^\[\[IN_PROGRESS\]\]\s*/,""):rawNote,pending,commission_rate:Number(r.commission_rate)||rate,collaborator:r.collaborator||"VDM",payment_type:r.payment_type||"percent",fixed_fee:Number(r.fixed_fee)||0}});
+  title.textContent=names[month]+" "+YEAR; render();
+}
+function rateEl(){return document.getElementById("rate")}
+function renderMonths(){months.innerHTML=names.map((n,i)=>{const k=`imos_final_${user?.id||"local"}_${YEAR}_${i+1}`,done=localStorage.getItem(k)==="1";return `<button class="${i===month?'active':''}" onclick="selectMonth(${i})">${n}${done?" ✓":""}</button>`}).join("")}
+async function selectMonth(i){month=i;renderMonths();loadMonth()}
+let rateTimer;
+async function changeRate(){
+  if(guardFinalized())return;
+  rate=Number(rateEl().value)||0; calc();
+  clearTimeout(rateTimer); rateTimer=setTimeout(async()=>{
+    const ids=data.map(x=>x.id); if(!ids.length)return;
+    const {error}=await sb.from("rooms").update({commission_rate:rate,updated_at:new Date().toISOString()}).in("id",ids);
+    if(error)setCloud("eroare la salvare",true);else{allRooms.forEach(r=>{if(ids.includes(r.id))r.commission_rate=rate});setCloud("salvat online")}
+  },450);
+}
+rateEl().removeAttribute("oninput"); rateEl().setAttribute("oninput","changeRate()");
+
+let editTimers={};
+function edit(i,field,v){
+  if(guardFinalized())return;
+  const row=data[i]; if(!row)return;
+  if(field==="room")row.room=v; else if(field==="value")row.value=v===""?0:Number(String(v).replace(",", "."))||0; else if(field==="note")row.note=v;
+  else if(field==="collaborator")row.collaborator=v; else if(field==="payment_type")row.payment_type=v;
+  else if(field==="commission_rate")row.commission_rate=v===""?0:Number(String(v).replace(",", "."))||0;
+  else if(field==="fixed_fee")row.fixed_fee=v===""?0:Number(String(v).replace(",", "."))||0;
+  calc(); clearTimeout(editTimers[row.id]); editTimers[row.id]=setTimeout(()=>saveRoom(row),500);
+}
+async function saveRoom(row){
+  setCloud("se salvează…");
+  const patch={room_name:row.room,work_value:row.value,notes:(row.pending?"[[IN_PROGRESS]] ":"")+(row.note||""),collaborator:row.collaborator||null,payment_type:row.payment_type||"percent",commission_rate:Number(row.commission_rate)||0,fixed_fee:Number(row.fixed_fee)||0,updated_at:new Date().toISOString()};
+  const {error}=await sb.from("rooms").update(patch).eq("id",row.id);
+  if(error)setCloud("eroare la salvare",true);else{let x=allRooms.find(r=>r.id===row.id);if(x)Object.assign(x,patch);setCloud("salvat online")}
+}
+async function add(){
+  if(guardFinalized())return;
+  const name=prompt("Numele clientului:"); if(name===null||!name.trim())return;
+  const room=prompt("Prima încăpere / proiect:"); if(room===null)return;
+  setLoading(true);
+  let client=Object.values(clientsById).find(c=>c.name.trim().toLowerCase()===name.trim().toLowerCase());
+  if(!client){
+    const {data:c,error}=await sb.from("clients").insert({user_id:user.id,name:name.trim()}).select().single();
+    if(error){alert(error.message);setLoading(false);return} client=c;
+  }
+  const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:client.id,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0});
+  if(error)alert(error.message); await refreshAll(); setLoading(false);
+}
+async function addRoom(clientId){
+  if(guardFinalized())return;
+  const client=clientsById[clientId], room=prompt("Încăpere pentru "+(client?.name||"client")+":");
+  if(room===null||!room.trim())return;
+  const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:clientId,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0});
+  if(error)alert(error.message); await refreshAll();
+}
+async function renameClient(clientId){
+  if(guardFinalized())return;
+  const old=clientsById[clientId]?.name||"", n=prompt("Numele clientului:",old);
+  if(n===null||!n.trim())return;
+  const {error}=await sb.from("clients").update({name:n.trim()}).eq("id",clientId);
+  if(error)alert(error.message); await refreshAll();
+}
+async function removeRow(i){
+  if(guardFinalized())return;
+  const row=data[i]; if(!row||!confirm("Ștergi această încăpere?"))return;
+  for(const d of (docsByRoom[row.id]||[])) await sb.storage.from(BUCKET).remove([d.storage_path]);
+  await sb.from("documents").delete().eq("room_id",row.id);
+  const {error}=await sb.from("rooms").delete().eq("id",row.id);
+  if(error)alert(error.message); await refreshAll();
+}
+
+function initMobileMonthPicker(){
+  const btn=document.getElementById('mobileMonthBtn');
+  const menu=document.getElementById('mobileMonthMenu');
+  if(!btn||!menu) return;
+  menu.innerHTML=names.map((m,i)=>`<button type="button" class="mobileMonthOption ${i===month?'active':''}" data-month="${i}">${m} ${YEAR}</button>`).join('');
+  btn.onclick=(e)=>{
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  };
+  menu.onclick=(e)=>{
+    const opt=e.target.closest('.mobileMonthOption');
+    if(!opt) return;
+    selectMonth(Number(opt.dataset.month));
+    menu.classList.remove('open');
+  };
+  document.addEventListener('click',(e)=>{
+    if(!e.target.closest('.mobileMonthPicker')) menu.classList.remove('open');
+  });
+}
+function syncMobileMonthPicker(){
+  const btn=document.getElementById('mobileMonthBtn');
+  const menu=document.getElementById('mobileMonthMenu');
+  if(btn) btn.innerHTML=`${names[month]} ${YEAR} <span>▼</span>`;
+  if(menu) menu.querySelectorAll('.mobileMonthOption').forEach((el,i)=>el.classList.toggle('active',i===month));
+}
+
+async function togglePending(i){
+  const row=data[i]; if(!row)return;
+  // O lucrare în curs este independentă de lună. Când o finalizezi, intră în luna selectată acum.
+  if(row.pending){
+    if(isMonthFinalized()){alert(`Luna ${names[month]} este finalizată. Redeschide luna dacă vrei să finalizezi lucrarea aici.`);return;}
+    row.pending=false;
+    row.month=month+1;
+    setCloud("se salvează…");
+    const cleanNote=row.note||"";
+    const patch={month:month+1,room_name:row.room,work_value:row.value,notes:cleanNote,collaborator:row.collaborator||null,payment_type:row.payment_type||"percent",commission_rate:Number(row.commission_rate)||0,fixed_fee:Number(row.fixed_fee)||0,updated_at:new Date().toISOString()};
+    const {error}=await sb.from("rooms").update(patch).eq("id",row.id);
+    if(error){setCloud("eroare la salvare",true);alert(error.message);return;}
+    let x=allRooms.find(r=>r.id===row.id);if(x)Object.assign(x,patch);
+    setCloud("salvat online");
+    loadMonth();
+  }else{
+    if(guardFinalized())return;
+    row.pending=true;
+    await saveRoom(row);
+    loadMonth();
+  }
+}
+function finalizedRows(){return data.filter(r=>!r.pending)}
+function render(){
+  syncMobileMonthPicker();
+  let groups=[],map={};
+  data.forEach((r,i)=>{
+    if(!map[r.client_id]){map[r.client_id]={client:r.client,client_id:r.client_id,rows:[]};groups.push(map[r.client_id])}
+    map[r.client_id].rows.push({r,i});
+  });
+  body.innerHTML=groups.map(g=>`<section class="clientCard">
+    <div class="clientCardHead"><div class="clientTitle"><span>CLIENT</span><strong>${esc(g.client)}</strong></div>
+    <div class="clientButtons"><button class="mini" onclick="addRoom('${g.client_id}')">+ Încăpere</button><button class="mini editClient" onclick="renameClient('${g.client_id}')">✎</button></div></div>
+    <div class="clientRooms">${g.rows.map(({r,i})=>`<div class="roomGrid">
+      <div class="roomName"><span class="arrow" aria-hidden="true"></span><input class="cell" value="${esc(r.room)}" title="${esc(r.room)}" placeholder="Încăpere" oninput="edit(${i},'room',this.value);this.title=this.value"></div>
+      <div class="collabCell"><input class="collabInput" value="${esc(r.collaborator)}" placeholder="Colaborator (ex. VDM)" oninput="edit(${i},'collaborator',this.value)"></div>
+      <div class="payCell"><div class="payBox"><select onchange="edit(${i},'payment_type',this.value);render()"><option value="percent" ${r.payment_type==="percent"?"selected":""}>Procent</option><option value="fixed" ${r.payment_type==="fixed"?"selected":""}>Sumă fixă</option></select>${r.payment_type==="fixed"?`<input type="number" step=".01" value="${r.fixed_fee||""}" placeholder="0" oninput="edit(${i},'fixed_fee',this.value)"><span class="paySuffix">lei</span>`:`<input type="number" step=".1" value="${r.commission_rate}" placeholder="5" oninput="edit(${i},'commission_rate',this.value)"><span class="paySuffix">%</span>`}</div></div>
+      <div class="roomValue"><input class="cell right" type="number" step=".01" value="${r.value||""}" placeholder="0" oninput="edit(${i},'value',this.value)"><b>lei</b></div>
+      <div class="roomCommission" id="c${i}">—</div>
+      <div class="notesCell"><label class="mobileFieldLabel">OBSERVAȚII</label><input class="noteInput" value="${esc(r.note)}" placeholder="Scrie observații..." oninput="edit(${i},'note',this.value)"></div>
+      <div class="docWrap"><label class="mobileFieldLabel">DOCUMENTE</label><div id="doc${i}">${docHtml(r,i)}</div><input id="file${i}" type="file" style="display:none" onchange="storeDoc(${i},this.files[0]);this.value=''"></div>
+      <div class="statusCell"><button class="statusBtn ${r.pending?"pending":""}" onclick="togglePending(${i})">${r.pending?"În curs":"Finalizat"}</button></div>
+      <div class="removeCell"><button class="remove" onclick="removeRow(${i})">×</button></div>
+    </div>`).join("")}</div></section>`).join("");
+  calc();renderMonths();updateFinalizeUI();
+}
+function docHtml(r,i){
+  const ds=docsByRoom[r.id]||[];
+  if(!ds.length)return `<button class="clip" onclick="pickDoc(${i})">📎 Atașează</button>`;
+  return ds.map(d=>`<div style="display:flex;align-items:center;gap:3px;margin:2px 0"><span class="doclink" title="${esc(d.file_name)}" onclick="openDoc('${d.id}')">📎 ${esc(d.file_name)}</span><button class="docdel" onclick="deleteDoc('${d.id}')">×</button></div>`).join("")+`<button class="clip" onclick="pickDoc(${i})" style="margin-top:4px">+ document</button>`;
+}
+function pickDoc(i){document.getElementById("file"+i).click()}
+async function storeDoc(i,file){
+  if(guardFinalized())return;
+  if(!file)return; const row=data[i]; if(!row)return;
+  setLoading(true);
+  const safe=file.name.replace(/[^\w.\-() ]+/g,"_");
+  const path=`${user.id}/${row.id}/${Date.now()}_${safe}`;
+  const {error:ue}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});
+  if(ue){alert("Nu am putut încărca documentul: "+ue.message);setLoading(false);return}
+  const {error:de}=await sb.from("documents").insert({user_id:user.id,room_id:row.id,file_name:file.name,storage_path:path});
+  if(de){await sb.storage.from(BUCKET).remove([path]);alert(de.message)}
+  await refreshAll(); setLoading(false);
+}
+async function openDoc(docId){
+  const d=Object.values(docsByRoom).flat().find(x=>x.id===docId); if(!d)return;
+  const {data:s,error}=await sb.storage.from(BUCKET).createSignedUrl(d.storage_path,60);
+  if(error){alert(error.message);return} window.open(s.signedUrl,"_blank","noopener");
+}
+async function deleteDoc(docId){
+  if(guardFinalized())return;
+  if(!confirm("Ștergi documentul?"))return;
+  const d=Object.values(docsByRoom).flat().find(x=>x.id===docId); if(!d)return;
+  await sb.storage.from(BUCKET).remove([d.storage_path]);
+  const {error}=await sb.from("documents").delete().eq("id",docId);
+  if(error)alert(error.message); await refreshAll();
+}
+function rowBill(r){return r.payment_type==="fixed"?(Number(r.fixed_fee)||0):(Number(r.value)||0)*(Number(r.commission_rate)||0)/100}
+function invoiceGroups(){
+  const m=new Map();
+  finalizedRows().forEach(r=>{
+    const name=(r.collaborator||"").trim();
+    if(!name)return;
+    if(!m.has(name))m.set(name,{name,total:0,count:0});
+    const g=m.get(name);g.total+=rowBill(r);g.count++;
+  });
+  return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name,"ro"));
+}
+function copyText(txt,msg){
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(()=>alert(msg));}
+  else{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();alert(msg);}
+}
+function renderInvoices(){
+  const el=document.getElementById("invoiceList");if(!el)return;
+  const gs=invoiceGroups();
+  if(!gs.length){el.innerHTML='<div class="invoiceEmpty">Completează câmpul <b>Colaborator</b> la lucrări, iar aici va apărea automat suma de facturat pentru fiecare firmă.</div>';return}
+  const article=`Servicii de proiectare mobilier aferente lunii ${names[month].toLowerCase()} ${YEAR}, conform contractului și actului adițional`;
+  el.innerHTML=gs.map(g=>`<div class="invoiceRow">
+    <div><div class="invoiceName">${esc(g.name)}</div><div class="invoiceMeta">${g.count} ${g.count===1?"lucrare":"lucrări"} · ${names[month]} ${YEAR}</div></div>
+    <div class="invoiceAmount">${fmt(g.total)}</div>
+    <div class="invoiceActions">
+      <button class="mini" onclick='copyText(${JSON.stringify(article)},"Textul articolului a fost copiat.")'>Copiază articol</button>
+      <button class="mini" onclick='copyText(${JSON.stringify(String(g.total.toFixed(2)))},"Suma a fost copiată.")'>Copiază suma</button>
+    </div>
+  </div>`).join("");
+}
+function calc(){
+  let t=0,b=0,n=0,pt=0,pb=0;
+  data.forEach((r,i)=>{let v=Number(r.value)||0,c=rowBill(r);if(r.pending){pt+=v;pb+=c}else{t+=v;b+=c;if(v)n++}let e=document.getElementById("c"+i);if(e)e.textContent=(v||c)?fmt(c):"—"});
+  work.textContent=fmt(t);bill.textContent=bill2.textContent=fmt(b);nr.textContent=n;
+  if(document.getElementById("pendingWork"))pendingWork.textContent=fmt(pt);if(document.getElementById("pendingBill"))pendingBill.textContent=fmt(pb);if(document.getElementById("pendingNet"))pendingNet.textContent=fmt(estimateNetMonthly(pb));
+  renderTarget(t);renderChart();taxCalc();renderInvoices();
+}
+function renderTarget(total){
+  let color,text;
+  if(total>=400000){color="#7b2cbf";text="FOARTE BUN · peste 400.000 lei"}
+  else if(total>=350000){color="#15966a";text="BUN · ținta de 350.000 lei atinsă"}
+  else if(total>=300000){color="#e59b16";text="MEDIU · peste 300.000 lei"}
+  else{color="#d71920";text="SLAB · sub 300.000 lei"}
+  const target=350000, diff=target-total;
+  const gapText=diff>0?`Mai sunt ${fmt(diff)} până la ținta de 350.000 lei`:`Ținta depășită cu ${fmt(Math.abs(diff))}`;
+  targetText.innerHTML=`${text}<span class="targetGap">${gapText}</span>`;
+  targetText.style.color=color;targetBar.style.background=color;targetBar.style.width=Math.min(100,total/400000*100)+"%";targetBox.style.borderLeft="5px solid "+color;
+  renderMonthComparison();
+}
+
+function renderMonthComparison(){
+  const el=document.getElementById("monthCompareText"), pctEl=document.getElementById("monthComparePct");
+  if(!el||!pctEl)return;
+  const current=finalizedRows().reduce((a,r)=>a+rowBill(r),0);
+  if(month===0){
+    el.textContent=`${names[month]}: ${fmt(current)} · nu există lună precedentă în ${YEAR}`;
+    pctEl.textContent="—"; pctEl.style.color="#777"; return;
+  }
+  const prev=monthBill(month-1), delta=current-prev;
+  el.textContent=`${names[month]}: ${fmt(current)} · ${names[month-1]}: ${fmt(prev)}`;
+  if(prev===0){
+    pctEl.textContent=delta===0?"0%":"—";
+    pctEl.style.color="#777";
+    return;
+  }
+  const pct=delta/prev*100;
+  pctEl.textContent=`${pct>=0?"+":""}${pct.toLocaleString("ro-RO",{maximumFractionDigits:1})}%`;
+  pctEl.style.color=pct>0?"#15966a":pct<0?"#d71920":"#777";
+}
+
+function monthBill(i){
+  const rows=allRooms.filter(r=>r.month===i+1 && !String(r.notes||"").startsWith("[[IN_PROGRESS]]"));
+  return rows.reduce((a,r)=>a+((r.payment_type||"percent")==="fixed"?(Number(r.fixed_fee)||0):(Number(r.work_value)||0)*(Number(r.commission_rate)||0)/100),0);
+}
+function renderChart(){
+  let vals=names.map((_,i)=>i===month?finalizedRows().reduce((a,r)=>a+rowBill(r),0):monthBill(i)),max=Math.max(...vals,1);
+  chart.innerHTML=vals.map((v,i)=>{let h=v?Math.max(7,(v/max)*210):2;return `<div title="${names[i]}: ${fmt(v)}" style="flex:1;height:${h}px;background:${i===month?'#d71920':'#111'};border-radius:6px 6px 0 0;min-width:10px;position:relative">${v?`<div style="position:absolute;top:-20px;width:100%;text-align:center;font-size:10px;font-weight:800;white-space:nowrap">${Math.round(v).toLocaleString("ro-RO")}</div>`:""}</div>`}).join("");
+  chartLabels.innerHTML=names.map((n,i)=>`<div style="flex:1;text-align:center;font-size:10px;font-weight:${i===month?900:700};color:${i===month?'#d71920':'#666'}">${n.slice(0,3)}</div>`).join("");
+}
+const TAX2026={minWage:4050,casRate:.25,cassRate:.10,taxRate:.10};
+function estimateNetMonthly(monthlyGross){
+  let annualGross=(Number(monthlyGross)||0)*12,s=TAX2026.minWage;
+  let casBase=annualGross>=24*s?24*s:(annualGross>=12*s?12*s:0),annualCAS=casBase*TAX2026.casRate,annualCASS=Math.min(annualGross,72*s)*TAX2026.cassRate;
+  let annualTax=Math.max(0,annualGross-annualCAS-annualCASS)*TAX2026.taxRate,monthlyTaxes=(annualCAS+annualCASS+annualTax)/12;
+  return Math.max(0,(Number(monthlyGross)||0)-monthlyTaxes);
+}
+function taxCalc(){
+  let monthlyGross=finalizedRows().reduce((a,r)=>a+rowBill(r),0),annualGross=monthlyGross*12,s=TAX2026.minWage;
+  let casBase=annualGross>=24*s?24*s:(annualGross>=12*s?12*s:0),annualCAS=casBase*TAX2026.casRate,annualCASS=Math.min(annualGross,72*s)*TAX2026.cassRate;
+  let annualTax=Math.max(0,annualGross-annualCAS-annualCASS)*TAX2026.taxRate,monthlyTaxes=(annualCAS+annualCASS+annualTax)/12;
+  grossHand.textContent=fmt(monthlyGross);taxHand.textContent=fmt(monthlyTaxes);netHand.textContent=fmt(Math.max(0,monthlyGross-monthlyTaxes));
+}
+function csvSafe(v){return `"${String(v??"").replaceAll('"','""')}"`}
+function exportCSV(){
+  let rows=[["Colaborator","Client","Proiect / incapere","Valoare lucrare (lei)","Tip plata","Procent (%)","Suma fixa (lei)","De facturat (lei)","Observatii"]];
+  finalizedRows().forEach(r=>rows.push([r.collaborator,r.client,r.room,r.value||"",r.payment_type==="fixed"?"Suma fixa":"Procent",r.payment_type==="percent"?r.commission_rate:"",r.payment_type==="fixed"?r.fixed_fee:"",rowBill(r),r.note]));
+  let total=finalizedRows().reduce((a,r)=>a+(Number(r.value)||0),0),totalBill=finalizedRows().reduce((a,r)=>a+rowBill(r),0);rows.push([]);rows.push(["TOTAL","","",total,"","","",totalBill,""]);
+  let csv="\\ufeff"+rows.map(r=>r.map(csvSafe).join(";")).join("\\r\\n"),url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  let a=document.createElement("a");a.href=url;a.download=`IMOS_${names[month]}_${YEAR}.csv`;a.click();URL.revokeObjectURL(url);
+}
+function exportPDF(){
+  let total=finalizedRows().reduce((a,r)=>a+(Number(r.value)||0),0),billv=finalizedRows().reduce((a,r)=>a+rowBill(r),0);
+  let rows=finalizedRows().map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td class="num">${r.value?fmt(r.value):"—"}</td><td class="num">${fmt(rowBill(r))}</td><td class="notes">${esc(r.note||"—")}</td></tr>`).join("");
+  let w=window.open("","_blank");w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>IMOS ${names[month]} ${YEAR}</title><style>@page{size:A4;margin:16mm}body{font-family:Arial;color:#111}h1{color:#d71920}.sub{color:#666;margin-bottom:20px}table{width:100%;border-collapse:collapse}th{background:#111;color:#fff}th,td{padding:8px 6px;border-bottom:1px solid #ddd;vertical-align:top;font-size:10px}th:nth-child(1){width:18%}th:nth-child(2){width:17%}th:nth-child(3){width:17%}th:nth-child(4){width:17%}th:nth-child(5){width:31%}.notes{white-space:pre-wrap;overflow-wrap:anywhere}.num{text-align:right;white-space:nowrap}.footer{text-align:right;font-weight:bold;margin-top:18px}.red{color:#d71920}
+/* ===== MOBILE FIX 2026-09 ===== */
+@media (max-width: 800px){
+  main{padding:18px 10px}
+  .top{gap:12px;flex-direction:column}
+  .top>div:last-child{width:100%}
+  .top>div:last-child button{flex:1}
+
+  .card{padding:20px}
+  #targetBox{padding:16px 14px!important}
+  #targetBox>div{display:block!important}
+  #targetBox>div>div:first-child{margin-bottom:14px}
+  #targetText{font-size:16px!important;line-height:1.2}
+  #targetBox>div>div:last-child{min-width:0!important;max-width:none!important;width:100%}
+
+  .panelhead{padding:16px 14px;gap:10px}
+  .clientCards{padding:12px!important}
+  .clientCard{margin-bottom:16px!important}
+  .clientCardHead{padding:12px 14px;min-height:72px!important}
+  .clientTitle{min-width:0;align-items:flex-start}
+  .clientTitle strong{font-size:17px!important;line-height:1.08;overflow-wrap:anywhere}
+  .clientButtons{flex-shrink:0}
+  .mini{padding:7px 9px}
+
+  .roomGrid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(118px,.72fr)!important;
+    gap:10px 12px!important;
+    padding:14px!important;
+    align-items:center!important;
+  }
+  .roomGrid>div{min-width:0}
+  .roomName{grid-column:1 / -1;padding-left:0}
+  .roomName input{font-size:16px;min-width:0}
+
+  .roomValue{
+    grid-column:1;
+    justify-content:flex-start!important;
+    border:1px solid #e3e3e3;
+    border-radius:9px;
+    padding:4px 8px;
+    min-width:0;
+  }
+  .roomValue input{
+    width:100%!important;
+    min-width:0!important;
+    text-align:right!important;
+    font-size:16px;
+    padding:7px 3px;
+  }
+  .roomValue b{flex:0 0 auto;white-space:nowrap}
+
+  .roomCommission{
+    grid-column:2;
+    text-align:right!important;
+    font-size:17px;
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:visible;
+  }
+
+  .roomGrid>div:nth-child(4){grid-column:1}
+  .roomGrid>div:nth-child(5){grid-column:2}
+  .noteInput{min-width:0;width:100%;font-size:13px}
+  .docWrap{min-width:0}
+  .doclink{max-width:100%;font-size:11px}
+  .clip{width:100%;min-height:40px}
+  .roomGrid>div:nth-child(6){
+    grid-column:1 / -1;
+    justify-self:end;
+    margin-top:-4px;
+  }
+  .remove{padding:5px 10px}
+
+  .bottom{padding:14px;gap:12px;align-items:flex-start}
+  .bottom .total{text-align:right;font-size:13px}
+
+  #chart{gap:5px!important}
+  #chartLabels{gap:5px!important}
+}
+
+@media (max-width: 430px){
+  .clientCardHead{gap:8px}
+  .clientTitle span{display:none}
+  .clientTitle strong{font-size:16px!important}
+  .clientButtons{gap:4px}
+  .mini{font-size:9px;padding:7px}
+  .roomGrid{grid-template-columns:minmax(0,1fr) minmax(112px,.78fr)!important;gap:9px!important}
+  .roomCommission{font-size:16px}
+  .roomValue input{font-size:15px}
+}
+
+
+/* ===== SELECTOR LUNI PE MOBIL ===== */
+.mobileMonthPicker{display:none}
+@media (max-width:800px){
+  .mobileMonthPicker{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 14px;
+    padding:10px 12px;
+    background:#090909;
+    border-radius:12px;
+  }
+  .mobileMonthPicker label{
+    color:#aaa;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .mobileMonthPicker select{
+    flex:1;
+    min-width:0;
+    border:1px solid #333;
+    border-radius:9px;
+    background:#171717;
+    color:#fff;
+    padding:10px 12px;
+    font:700 14px Arial,sans-serif;
+    outline:none;
+  }
+  .mobileMonthPicker select:focus{border-color:#e21b23}
+}
+
+
+/* ===== MOBILE MONTH MENU FIX ===== */
+@media (max-width:800px){
+  .mobileMonthPicker{
+    display:block!important;
+    position:relative;
+    margin:0 0 14px;
+    padding:0!important;
+    background:transparent!important;
+    z-index:1000;
+  }
+  .mobileMonthBtn{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border:0;
+    border-radius:12px;
+    padding:13px 15px;
+    background:#090909;
+    color:#fff;
+    font:800 15px Arial,sans-serif;
+    cursor:pointer;
+  }
+  .mobileMonthBtn span{color:#e21b23}
+  .mobileMonthMenu{
+    display:none;
+    position:absolute;
+    left:0; right:0; top:calc(100% + 6px);
+    max-height:330px;
+    overflow-y:auto;
+    background:#0b0b0b;
+    border:1px solid #333;
+    border-radius:12px;
+    box-shadow:0 12px 30px rgba(0,0,0,.3);
+    padding:6px;
+    z-index:99999;
+  }
+  .mobileMonthMenu.open{display:block}
+  .mobileMonthOption{
+    display:block;
+    width:100%;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:#fff;
+    padding:11px 12px;
+    text-align:left;
+    font:700 14px Arial,sans-serif;
+    cursor:pointer;
+  }
+  .mobileMonthOption.active{background:#e21b23}
+}
+
+
+/* v14 - TIP PLATA mutat vizual deasupra dropdown-ului Proc */
+@media (min-width:1051px){
+  .projectsHead > div:nth-child(3){text-align:left!important;transform:none!important;}
+}
+</style></head><body><div style="font-size:12px;font-weight:800;letter-spacing:.3px;margin-bottom:6px">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div>
+<h1>CENTRALIZATOR SERVICII PROIECTARE</h1><div class="sub">${names[month]} ${YEAR}<br>Colaborator: ${(()=>{const c=(data.find(r=>(r.collaborator||"").trim())?.collaborator)||"—";return c.trim().toUpperCase()==="VDM"?"VDM MOBILIART SRL":esc(c)})()}</div><table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">Total de facturat: <span class="red">${fmt(billv)}</span></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script><div style="margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;line-height:1.45;color:#666">
+Centralizator întocmit pe baza situației centralizate a proiectelor pusă la dispoziție de Client, conform Contractului de prestări servicii și Actului adițional nr. 1. Sunt incluse exclusiv lucrările pentru care serviciile de proiectare au fost efectuate de Prestator.
+</div>
+</body></html>`);w.document.close();
+}
+renderMonths();initMobileMonthPicker();syncMobileMonthPicker();
+</script></body></html>
