@@ -497,10 +497,15 @@ input.cell{border:0;background:transparent;padding:7px;width:100%;font:inherit;f
 }
 
 
+/* Target icon */
+.targetLayout{display:flex;align-items:center;gap:16px}
+.targetIcon{width:58px;height:58px;min-width:58px;border-radius:50%;background:#fff0f1;display:flex;align-items:center;justify-content:center;color:#d71920;font-size:31px;font-weight:900;box-shadow:inset 0 0 0 1px #ffd6d8}
+.targetIcon svg{width:32px;height:32px}
+@media(max-width:800px){.targetLayout{align-items:flex-start}.targetIcon{width:48px;height:48px;min-width:48px;font-size:26px}.targetIcon svg{width:27px;height:27px}}
 /* Created by signature */
 aside{display:flex;flex-direction:column;min-height:100vh}
 .createdBy{margin-top:auto;padding:22px 10px 4px;color:#777;font-size:10px;line-height:1.35;letter-spacing:.02em}
-.createdBy strong{display:block;color:#c7cbd1;font-size:11px;font-weight:800;margin-top:2px}
+.createdBy strong{display:block;color:#f2f2f2;font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em}
 
 /* ===== UI compact + finalizare luna ===== */
 @media (min-width:801px){
@@ -651,7 +656,7 @@ aside .year,aside .months{display:none}
 </div>
 <div id="loadingScreen" class="loadingScreen"><div class="spinner"></div><b>Se încarcă IMOS Projects…</b></div>
 <div class="app" id="app">
-<aside><div class="brand"><span>IMOS</span> Projects<div style="font-size:12px;font-weight:700;color:#c7cbd1;margin-top:7px;letter-spacing:.02em">MICLERU GEORGE PFA</div></div><div class="nav">LUNA SELECTATĂ</div><div class="desktopMonthPicker"><button type="button" id="desktopMonthBtn" class="desktopMonthBtn">Septembrie 2026 <span>▼</span></button><div id="desktopMonthMenu" class="desktopMonthMenu"></div></div><div class="sideNav"><button class="sideNavBtn active" onclick="closeWorkspace()"><span>⌂</span>Dashboard</button><button class="sideNavBtn" onclick="openWorkspace('documents')"><span>📁</span>Documente</button><button class="sideNavBtn" onclick="openWorkspace('invoices')"><span class="brandMark soloMark">SOLO</span>Facturi</button><button class="sideNavBtn" onclick="openWorkspace('collabs')"><span>👥</span>Colaboratori</button><button class="sideNavBtn" onclick="openWorkspace('tasks')"><span>✓</span>De rezolvat</button><button class="sideNavBtn" onclick="openWorkspace('settings')"><span>⚙</span>Setări</button></div><div class="year">2026</div><div class="months" id="months"></div><div class="createdBy">Created by<strong>George Micleru</strong></div></aside>
+<aside><div class="brand"><span>IMOS</span> Projects<div style="font-size:12px;font-weight:700;color:#c7cbd1;margin-top:7px;letter-spacing:.02em">MICLERU GEORGE PFA</div></div><div class="nav">LUNA SELECTATĂ</div><div class="desktopMonthPicker"><button type="button" id="desktopMonthBtn" class="desktopMonthBtn">Septembrie 2026 <span>▼</span></button><div id="desktopMonthMenu" class="desktopMonthMenu"></div></div><div class="sideNav"><button class="sideNavBtn active" onclick="closeWorkspace()"><span>⌂</span>Dashboard</button><button class="sideNavBtn" onclick="openWorkspace('documents')"><span>📁</span>Documente</button><button class="sideNavBtn" onclick="openWorkspace('invoices')"><span class="brandMark soloMark">SOLO</span>Facturi</button><button class="sideNavBtn" onclick="openWorkspace('collabs')"><span>👥</span>Colaboratori</button><button class="sideNavBtn" onclick="openWorkspace('tasks')"><span>✓</span>De rezolvat</button><button class="sideNavBtn" onclick="openWorkspace('settings')"><span>⚙</span>Setări</button></div><div class="year">2026</div><div class="months" id="months"></div><div class="createdBy"><span>Created by</span><strong>George MICLERU</strong></div></aside>
 <main>
 <div class="mobileTopNav"><div class="mobileMonthPicker">
       <button type="button" id="mobileMonthBtn" class="mobileMonthBtn">Septembrie 2026 <span>▼</span></button>
@@ -673,9 +678,12 @@ aside .year,aside .months{display:none}
 </div>
 <div class="nextMini" id="nextMini"><div><span class="nextDot"></span><strong>Ce urmează</strong></div><div class="nextStats"><span><b id="nextPendingCount">0</b> în curs</span><span><b id="nextPendingValue">0 lei</b> valoare</span><span><b id="nextPendingBill">0 lei</b> de facturat</span></div></div>
 <div class="summaryGrid"><div id="targetBox" style="margin:-8px 0 20px;background:white;border:1px solid var(--line);border-radius:14px;padding:16px 20px">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
-    <div>
-      <div class="label">Țintă lunară · 350.000 lei</div>
+  <div class="targetLayout">
+    <div class="targetIcon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4"/><circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="4"/><circle cx="24" cy="24" r="3" fill="currentColor"/><path d="M27 21L40 8M40 8H32M40 8V16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
+        <div>
+          <div id="targetLabel" class="label">Țintă lunară · 350.000 lei</div>
       <div id="targetText" style="font-size:17px;font-weight:900;margin-top:5px">—</div>
     </div>
     <div style="min-width:280px;flex:1;max-width:520px">
@@ -684,6 +692,7 @@ aside .year,aside .months{display:none}
       </div>
       <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:800;color:#777;margin-top:6px">
         <span>0</span><span>300.000</span><span>350.000</span><span>400.000 lei</span>
+        </div>
       </div>
     </div>
   </div>
@@ -730,10 +739,13 @@ const SUPABASE_URL="https://invtioenqiwrjnxghqqs.supabase.co";
 const SUPABASE_KEY="sb_publishable_iUsHfykagLOWZ6SLi4wVrg_Fzank8lI";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
+if(location.hash.includes('error=') || location.hash.includes('access_denied')){history.replaceState(null,document.title,location.pathname+location.search)}
 const names=["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"];
 const seed=[["Dobrota 801A","Bucătărie",15944],["Cristache Camelia","Living",55498],["Visa","Living",27798],["Moscalu","Corp baie",2311],["Synapse","Dormitor",40429],["MOCIOI","Comodă living",8834],["MIHAILA","Bucătărie",43642],["HERA","Living",0],["HERA","Dorm. matrimonial",0],["HERA","Dorm. copil",0],["HERA","Hol",0]];
 const YEAR=2026, BUCKET="Documents";
-let month=8, data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={}, invoiceHistory=[], invoiceHistoryReady=true, pfaFiles=[], pfaTasks=[], pfaSettings={}, pfaWorkspaceReady=true;
+function getAutomaticMonth(){const d=new Date();return d.getFullYear()===YEAR?d.getMonth():8}
+
+let month=getAutomaticMonth(), data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={}, invoiceHistory=[], invoiceHistoryReady=true, pfaFiles=[], pfaTasks=[], pfaSettings={}, pfaWorkspaceReady=true;
 function finalKey(){return `imos_final_${user?.id||"local"}_${YEAR}_${month+1}`}
 function isMonthFinalized(){return localStorage.getItem(finalKey())==="1"}
 function updateFinalizeUI(){
@@ -996,18 +1008,26 @@ function syncMobileMonthPicker(){
 
 async function togglePending(i){
   const row=data[i]; if(!row)return;
-  // O lucrare în curs este independentă de lună. Când o finalizezi, intră în luna selectată acum.
+  // O lucrare în curs este independentă de luna afișată. La finalizare, data de azi stabilește automat luna.
   if(row.pending){
-    if(isMonthFinalized()){alert(`Luna ${names[month]} este finalizată. Redeschide luna dacă vrei să finalizezi lucrarea aici.`);return;}
+    const today=new Date();
+    const finalizeYear=today.getFullYear(), finalizeMonth=today.getMonth()+1;
+    if(finalizeYear!==YEAR){alert(`Data curentă este în ${finalizeYear}. Aplicația este configurată pentru ${YEAR}.`);return;}
+    if(localStorage.getItem(`imos_final_${user?.id||"local"}_${YEAR}_${finalizeMonth}`)==="1"){alert(`Luna ${names[finalizeMonth-1]} ${YEAR} este finalizată. Redeschide luna respectivă înainte să finalizezi lucrarea.`);return;}
     row.pending=false;
-    row.month=month+1;
+    row.month=finalizeMonth;
+    row.finalized_at=today.toISOString();
+
     setCloud("se salvează…");
     const cleanNote=row.note||"";
-    const patch={month:month+1,room_name:row.room,work_value:row.value,notes:cleanNote,collaborator:row.collaborator||null,payment_type:row.payment_type||"percent",commission_rate:Number(row.commission_rate)||0,fixed_fee:Number(row.fixed_fee)||0,updated_at:new Date().toISOString()};
+    const patch={month:finalizeMonth,room_name:row.room,work_value:row.value,notes:cleanNote,collaborator:row.collaborator||null,payment_type:row.payment_type||"percent",commission_rate:Number(row.commission_rate)||0,fixed_fee:Number(row.fixed_fee)||0,updated_at:new Date().toISOString()};
     const {error}=await sb.from("rooms").update(patch).eq("id",row.id);
     if(error){setCloud("eroare la salvare",true);alert(error.message);return;}
     let x=allRooms.find(r=>r.id===row.id);if(x)Object.assign(x,patch);
     setCloud("salvat online");
+    month=finalizeMonth-1;
+    renderMonths();
+    syncMobileMonthPicker();
     loadMonth();
   }else{
     if(guardFinalized())return;
@@ -1191,7 +1211,7 @@ function renderTarget(total){
   else{color="#d71920";text=`SLAB · sub ${Math.round(medium).toLocaleString("ro-RO")} lei`}
   const diff=target-total;
   const gapText=diff>0?`Mai sunt ${fmt(diff)} până la ținta de ${Math.round(target).toLocaleString("ro-RO")} lei`:`Ținta depășită cu ${fmt(Math.abs(diff))}`;
-  const lbl=document.querySelector('#targetBox [style*="font-size:12px"]');if(lbl)lbl.textContent=`ȚINTĂ LUNARĂ · ${Math.round(target).toLocaleString("ro-RO")} LEI`;
+  const lbl=document.getElementById('targetLabel');if(lbl)lbl.textContent=`ȚINTĂ LUNARĂ · ${Math.round(target).toLocaleString("ro-RO")} LEI`;
   targetText.innerHTML=`${text}<span class="targetGap">${gapText}</span>`;
   targetText.style.color=color;targetBar.style.background=color;targetBar.style.width=Math.min(100,total/Math.max(veryGood,1)*100)+"%";targetBox.style.borderLeft="5px solid "+color;
   renderMonthComparison();
