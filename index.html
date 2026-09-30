@@ -587,6 +587,11 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 .invoiceHistoryList{padding:10px 18px 18px}.historyRow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #ececef}.historyRow:last-child{border-bottom:0}.historyMain{font-weight:900}.historyMeta{font-size:11px;color:#777;margin-top:3px}.historyAmount{font-weight:900;color:#15966a;text-align:right;white-space:nowrap}.historyEmpty{padding:12px 0;color:#777;font-size:13px}@media(max-width:800px){.historyRow{grid-template-columns:1fr auto}.historyRow>div:nth-child(2),.historyRow>div:nth-child(3){grid-column:1}.historyRow .historyAmount{grid-column:2;grid-row:1}.historyRow>div:last-child{grid-column:1/-1}.historyRow button{width:100%}}
 </style>
 
+<style>
+/* v16.14 visual cleanup */
+.summaryGrid{display:grid;grid-template-columns:minmax(0,3.2fr) minmax(260px,1fr);gap:16px;margin-bottom:18px}.summaryGrid #targetBox{margin:0!important;height:100%;box-sizing:border-box}.summaryGrid .monthCompare{margin:0!important;height:100%;box-sizing:border-box;align-items:center}.cards{gap:16px}.card{box-shadow:0 4px 16px rgba(17,24,39,.035)}.worksPanel{box-shadow:0 8px 26px rgba(17,24,39,.045)}.compactSection{background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden;box-shadow:0 6px 20px rgba(17,24,39,.04)}.compactHead{width:100%;min-height:68px;border:0;background:#fff;display:flex;align-items:center;gap:14px;padding:12px 18px;text-align:left;cursor:pointer;color:#111;font:inherit}.compactHead:hover{background:#fbfbfc}.compactHead strong{font-size:16px}.compactIcon{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;flex:0 0 38px}.compactIcon.purple,.compactIcon.violet{background:#f0edff;color:#5a4cff}.compactIcon.red{background:#fff0f1;color:#d71920}.compactIcon.blue{background:#edf5ff;color:#1877d2}.compactBadge{background:#f0edff;color:#5a4cff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900}.compactBadge.redBadge{background:#fff0f1;color:#d71920}.compactMeta{margin-left:10px;color:#536071;font-size:13px}.compactMeta b{color:#263246}.chev{margin-left:auto;font-size:24px;line-height:1;transition:.2s}.compactHead.open .chev{transform:rotate(180deg)}.compactBody{border-top:1px solid #eee}.compactBody.collapsed{display:none}.compactNote{padding:14px 18px;color:#6b7280;font-size:12px}.compactNote .pendingNet{float:right;color:#15966a}.invoicePanel{margin-top:14px!important}.invoiceList{padding:0 18px}.invoiceHint{padding:10px 18px 16px}.invoiceHistoryList{padding:0 18px 12px}.searchWrap{margin-bottom:10px!important}#cloudBar{margin-bottom:16px!important}.top{margin-bottom:10px!important}
+@media(max-width:900px){.summaryGrid{grid-template-columns:1fr}.compactMeta{display:none}.compactHead{min-height:60px;padding:10px 12px}.compactNote .pendingNet{float:none;display:block;margin-top:6px}}
+</style>
 </head>
 <body>
 <div id="loginScreen" class="loginScreen">
@@ -633,7 +638,7 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 <div class="card"><div class="label">De facturat</div><div class="value green" id="bill">0 lei</div></div>
 <div class="card"><div class="label">Proiecte cu valoare</div><div class="value" id="nr">0</div></div>
 </div>
-<div id="targetBox" style="margin:-8px 0 20px;background:white;border:1px solid var(--line);border-radius:14px;padding:16px 20px">
+<div class="summaryGrid"><div id="targetBox" style="margin:-8px 0 20px;background:white;border:1px solid var(--line);border-radius:14px;padding:16px 20px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
     <div>
       <div class="label">Țintă lunară · 350.000 lei</div>
@@ -656,9 +661,9 @@ aside{display:flex;flex-direction:column;min-height:100vh}
     <div id="monthCompareText" class="monthCompareMain">—</div>
   </div>
   <div id="monthComparePct" class="monthComparePct">—</div>
-</div>
+</div></div>
 
-<div class="panel"><div class="panelhead"><strong>Lucrările lunii</strong><div class="rate">Procent standard <input id="rate" type="number" step=".1" value="5" oninput="save();render()"> %</div></div>
+<div class="panel worksPanel"><div class="panelhead"><strong>Lucrările lunii</strong><div class="rate">Procent standard <input id="rate" type="number" step=".1" value="5" oninput="save();render()"> %</div></div>
 <div class="projectsHead">
   <div>ÎNCĂPERE</div>
   <div>COLABORATOR</div>
@@ -672,31 +677,13 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 </div>
 <div id="body" class="clientCards"></div>
 <div class="bottom"><button class="add" onclick="add()">＋ Client nou</button><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="finalizeMonthBtn" class="finalizeBtn" onclick="toggleFinalizeMonth()">✓ Finalizează luna</button><div class="total">Total de facturat: <span class="green" id="bill2">0 lei</span></div></div></div></div>
-<div id="pendingSummary" class="pendingSummary"><div><strong>Lucrări în curs</strong><div style="font-size:11px;color:#777;margin-top:3px">Rămân aici indiferent de lună. Când le finalizezi, intră în luna selectată atunci. Nu intră în total, țintă, facturare sau PDF cât sunt în curs.</div></div><div class="pendingNumbers">Valoare: <span id="pendingWork">0 lei</span> · De facturat: <span id="pendingBill">0 lei</span><span class="pendingNet">Bani în mână estimat: <b id="pendingNet">0 lei</b></span></div></div>
+<div id="pendingSummary" class="compactSection"><button class="compactHead" type="button" onclick="toggleCompact('pendingDetail',this)"><span class="compactIcon purple">☷</span><strong>Lucrări în curs</strong><span class="compactBadge" id="pendingCountBadge">0</span><span class="compactMeta">Valoare: <b id="pendingWork">0 lei</b> · De facturat: <b id="pendingBill">0 lei</b></span><span class="chev">⌄</span></button><div id="pendingDetail" class="compactBody collapsed"><div class="compactNote">Rămân aici indiferent de lună. Când le finalizezi, intră în luna selectată atunci. Nu intră în total, țintă, facturare sau PDF cât sunt în curs. <span class="pendingNet">Bani în mână estimat: <b id="pendingNet">0 lei</b></span></div></div></div>
 
-<div class="panel invoicePanel">
-  <div class="panelhead">
-    <div><strong>Facturare</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Total de facturat pe colaborator în luna selectată</div></div>
-  </div>
-  <div id="invoiceList" class="invoiceList"></div>
-  <div class="invoiceHint">Textul pentru factură include automat luna selectată.</div>
-</div>
+<div class="compactSection invoicePanel"><button class="compactHead" type="button" onclick="toggleCompact('invoiceBody',this)"><span class="compactIcon red">▣</span><strong>Facturare – <span id="invoiceMonthLabel">Septembrie 2026</span></strong><span class="compactMeta"><b id="invoiceCompactTotal">0 lei</b></span><span class="chev">⌄</span></button><div id="invoiceBody" class="compactBody collapsed"><div id="invoiceList" class="invoiceList"></div><div class="invoiceHint">Textul pentru factură include automat luna selectată.</div></div></div>
 
-<div class="panel invoicePanel" id="invoiceHistoryPanel">
-  <div class="panelhead"><div><strong>Istoric facturi</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Facturile înregistrate după emiterea lor în SOLO</div></div></div>
-  <div id="invoiceHistoryList" class="invoiceHistoryList"><div class="historyEmpty">Se încarcă…</div></div>
-</div>
+<div class="compactSection invoicePanel" id="invoiceHistoryPanel"><button class="compactHead" type="button" onclick="toggleCompact('invoiceHistoryBody',this)"><span class="compactIcon violet">▤</span><strong>Istoric facturi</strong><span class="compactBadge redBadge" id="historyCountBadge">0 facturi</span><span class="compactMeta"><b id="historyTotalBadge">0 lei</b></span><span class="chev">⌄</span></button><div id="invoiceHistoryBody" class="compactBody collapsed"><div id="invoiceHistoryList" class="invoiceHistoryList"><div class="historyEmpty">Se încarcă…</div></div></div></div>
 
-<div class="panel" style="margin-top:18px">
-  <div class="panelhead">
-    <div><strong>Evoluție anuală</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Suma de facturat pe fiecare lună</div></div>
-    <strong style="color:var(--blue)">2026</strong>
-  </div>
-  <div style="padding:24px 22px 18px">
-    <div id="chart" style="height:260px;display:flex;align-items:flex-end;gap:10px;border-bottom:2px solid #111;padding:10px 5px 0"></div>
-    <div id="chartLabels" style="display:flex;gap:10px;padding:8px 5px 0"></div>
-  </div>
-</div>
+<div class="compactSection"><button class="compactHead" type="button" onclick="toggleCompact('annualBody',this)"><span class="compactIcon blue">▥</span><strong>Evoluție anuală 2026</strong><span class="compactMeta">Total facturat: <b id="annualTotalCompact">0 lei</b></span><span class="chev">⌄</span></button><div id="annualBody" class="compactBody collapsed"><div style="padding:24px 22px 18px"><div id="chart" style="height:260px;display:flex;align-items:flex-end;gap:10px;border-bottom:2px solid #111;padding:10px 5px 0"></div><div id="chartLabels" style="display:flex;gap:10px;padding:8px 5px 0"></div></div></div></div>
 
 <div class="panel" style="margin-top:18px">
   <div class="panelhead">
@@ -1098,12 +1085,23 @@ function printInvoiceSnapshot(i){
   const rows=snap.map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td style="text-align:right">${fmt(r.value)}</td><td style="text-align:right">${fmt(r.bill)}</td><td>${esc(r.note||"—")}</td></tr>`).join("");
   const w=window.open("","_blank"); w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Centralizator ${esc(x.invoice_number||"")}</title><style>@page{size:A4 landscape;margin:14mm}body{font-family:Arial;color:#111}h1{color:#d71920}table{width:100%;border-collapse:collapse}th{background:#111;color:#fff}th,td{padding:8px;border-bottom:1px solid #ddd;font-size:11px}.total{text-align:right;font-size:16px;font-weight:bold;margin-top:18px}.red{color:#d71920}</style></head><body><div style="font-size:12px;font-weight:800">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div><h1>CENTRALIZATOR SERVICII PROIECTARE</h1><p>${esc(names[(Number(x.month)||1)-1])} ${x.year} · ${esc(x.collaborator||"")} · Factura ${esc(x.invoice_number||"")} · ${esc(x.invoice_date||"")}</p><table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead><tbody>${rows}</tbody></table><div class="total">Total: <span class="red">${fmt(x.amount)}</span></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`); w.document.close();
 }
+
+function toggleCompact(id,btn){const el=document.getElementById(id);if(!el)return;el.classList.toggle("collapsed");if(btn)btn.classList.toggle("open",!el.classList.contains("collapsed"));}
+function updateCompactSummary(){
+ const pending=allRooms.filter(r=>String(r.notes||"").startsWith("[[IN_PROGRESS]]"));
+ const pc=document.getElementById("pendingCountBadge"); if(pc)pc.textContent=pending.length;
+ const im=document.getElementById("invoiceMonthLabel"); if(im)im.textContent=names[month]+" "+YEAR;
+ const ict=document.getElementById("invoiceCompactTotal"); if(ict)ict.textContent=fmt(finalizedRows().reduce((a,r)=>a+rowBill(r),0));
+ const hc=document.getElementById("historyCountBadge"); if(hc)hc.textContent=invoiceHistory.length+" "+(invoiceHistory.length===1?"factură":"facturi");
+ const ht=document.getElementById("historyTotalBadge"); if(ht)ht.textContent=fmt(invoiceHistory.reduce((a,x)=>a+(Number(x.amount)||0),0));
+ const at=document.getElementById("annualTotalCompact"); if(at)at.textContent=fmt(names.reduce((a,_,i)=>a+monthBill(i),0));
+}
 function calc(){
   let t=0,b=0,n=0,pt=0,pb=0;
   data.forEach((r,i)=>{let v=Number(r.value)||0,c=rowBill(r);if(r.pending){pt+=v;pb+=c}else{t+=v;b+=c;if(v)n++}let e=document.getElementById("c"+i);if(e)e.textContent=(v||c)?fmt(c):"—"});
   work.textContent=fmt(t);bill.textContent=bill2.textContent=fmt(b);nr.textContent=n;
   if(document.getElementById("pendingWork"))pendingWork.textContent=fmt(pt);if(document.getElementById("pendingBill"))pendingBill.textContent=fmt(pb);if(document.getElementById("pendingNet"))pendingNet.textContent=fmt(estimateNetMonthly(pb));
-  renderTarget(t);renderChart();taxCalc();renderInvoices();renderInvoiceHistory();
+  renderTarget(t);renderChart();taxCalc();renderInvoices();renderInvoiceHistory();updateCompactSummary();
 }
 function renderTarget(total){
   let color,text;
