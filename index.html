@@ -501,8 +501,8 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 .finalizeBtn{border:0;border-radius:9px;background:#111;color:#fff;padding:10px 14px;font-weight:900;cursor:pointer;margin-right:12px}
 .finalizeBtn.done{background:#168b64}
 .monthFinalized{font-size:11px;font-weight:900;color:#168b64;margin-left:8px}
-.monthLocked .clientRooms input,.monthLocked .clientRooms select,.monthLocked .clientRooms button,.monthLocked .clientButtons button,.monthLocked .add{pointer-events:none;opacity:.62}
-.monthLocked .doclink{pointer-events:none;opacity:.7}
+.monthLocked .lockedRow input,.monthLocked .lockedRow select,.monthLocked .lockedRow button{pointer-events:none;opacity:.62}
+.monthLocked .lockedRow .doclink{pointer-events:none;opacity:.7}
 @media(max-width:800px){.clientTitle strong{font-size:18px!important}.roomName input{font-size:16px!important}.finalizeBtn{margin:0 0 8px 0;width:100%}}
 
 /* v15 - aliniere TIP PLATA cu dropdown-ul Proc pe desktop */
@@ -972,7 +972,7 @@ function render(){
   body.innerHTML=groups.map(g=>`<section class="clientCard">
     <div class="clientCardHead"><div class="clientTitle"><span>CLIENT</span><strong>${esc(g.client)}</strong></div>
     <div class="clientButtons"><button class="mini" onclick="addRoom('${g.client_id}')">+ Încăpere</button><button class="mini editClient" onclick="renameClient('${g.client_id}')">✎</button></div></div>
-    <div class="clientRooms">${g.rows.map(({r,i})=>`<div class="roomGrid">
+    <div class="clientRooms">${g.rows.map(({r,i})=>`<div class="roomGrid ${(!r.pending && isMonthFinalized())?"lockedRow":""}">
       <div class="roomName"><span class="arrow" aria-hidden="true"></span><input class="cell" value="${esc(r.room)}" title="${esc(r.room)}" placeholder="Încăpere" oninput="edit(${i},'room',this.value);this.title=this.value"></div>
       <div class="collabCell"><input class="collabInput" value="${esc(r.collaborator)}" placeholder="Colaborator (ex. VDM)" oninput="edit(${i},'collaborator',this.value)"></div>
       <div class="payCell"><div class="payBox"><select onchange="edit(${i},'payment_type',this.value);render()"><option value="percent" ${r.payment_type==="percent"?"selected":""}>Procent</option><option value="fixed" ${r.payment_type==="fixed"?"selected":""}>Sumă fixă</option></select>${r.payment_type==="fixed"?`<input type="number" step=".01" value="${r.fixed_fee||""}" placeholder="0" oninput="edit(${i},'fixed_fee',this.value)"><span class="paySuffix">lei</span>`:`<input type="number" step=".1" value="${r.commission_rate}" placeholder="5" oninput="edit(${i},'commission_rate',this.value)"><span class="paySuffix">%</span>`}</div></div>
