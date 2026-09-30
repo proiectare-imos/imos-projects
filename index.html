@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IMOS Projects</title>
+<!-- v16.17: workspace PFA + documente/facturi + meniu compact -->
 <style>
 :root{--nav:#090909;--bg:#f5f5f5;--card:#fff;--ink:#111;--muted:#686868;--line:#e3e3e3;--blue:#d71920;--green:#d71920}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -592,6 +593,27 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 .summaryGrid{display:grid;grid-template-columns:minmax(0,3.2fr) minmax(260px,1fr);gap:16px;margin-bottom:18px}.summaryGrid #targetBox{margin:0!important;height:100%;box-sizing:border-box}.summaryGrid .monthCompare{margin:0!important;height:100%;box-sizing:border-box;align-items:center}.cards{gap:16px}.card{box-shadow:0 4px 16px rgba(17,24,39,.035)}.worksPanel{box-shadow:0 8px 26px rgba(17,24,39,.045)}.compactSection{background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden;box-shadow:0 6px 20px rgba(17,24,39,.04)}.compactHead{width:100%;min-height:68px;border:0;background:#fff;display:flex;align-items:center;gap:14px;padding:12px 18px;text-align:left;cursor:pointer;color:#111;font:inherit}.compactHead:hover{background:#fbfbfc}.compactHead strong{font-size:16px}.compactIcon{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;flex:0 0 38px}.compactIcon.purple,.compactIcon.violet{background:#f0edff;color:#5a4cff}.compactIcon.red{background:#fff0f1;color:#d71920}.compactIcon.blue{background:#edf5ff;color:#1877d2}.compactBadge{background:#f0edff;color:#5a4cff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900}.compactBadge.redBadge{background:#fff0f1;color:#d71920}.compactMeta{margin-left:10px;color:#536071;font-size:13px}.compactMeta b{color:#263246}.chev{margin-left:auto;font-size:24px;line-height:1;transition:.2s}.compactHead.open .chev{transform:rotate(180deg)}.compactBody{border-top:1px solid #eee}.compactBody.collapsed{display:none}.compactNote{padding:14px 18px;color:#6b7280;font-size:12px}.compactNote .pendingNet{float:right;color:#15966a}.invoicePanel{margin-top:14px!important}.invoiceList{padding:0 18px}.invoiceHint{padding:10px 18px 16px}.invoiceHistoryList{padding:0 18px 12px}.searchWrap{margin-bottom:10px!important}#cloudBar{margin-bottom:16px!important}.top{margin-bottom:10px!important}
 @media(max-width:900px){.summaryGrid{grid-template-columns:1fr}.compactMeta{display:none}.compactHead{min-height:60px;padding:10px 12px}.compactNote .pendingNet{float:none;display:block;margin-top:6px}}
 </style>
+
+<style>
+/* v16.16 - selector compact de luna pe desktop + blocare ferma */
+.desktopMonthPicker{position:relative;margin:2px 10px 18px}
+.desktopMonthBtn{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid #303030;border-radius:10px;padding:12px 13px;background:#171717;color:#fff;font:800 14px Inter,Segoe UI,Arial,sans-serif;cursor:pointer}
+.desktopMonthBtn span{color:#ef233c;font-size:11px}
+.desktopMonthMenu{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:10000;background:#111;border:1px solid #333;border-radius:11px;padding:6px;max-height:390px;overflow:auto;box-shadow:0 16px 38px rgba(0,0,0,.42)}
+.desktopMonthMenu.open{display:block}
+.desktopMonthOption{display:block;width:100%;border:0;border-radius:8px;background:transparent;color:#e5e7eb;padding:10px 11px;text-align:left;font:700 13px Inter,Segoe UI,Arial,sans-serif;cursor:pointer}
+.desktopMonthOption:hover{background:#242424}.desktopMonthOption.active{background:#d71920;color:#fff}
+.desktopMonthOption .doneMark{float:right}
+aside .year,aside .months{display:none}
+.lockedRow{position:relative}.lockedRow input:disabled,.lockedRow select:disabled,.lockedRow button:disabled{cursor:not-allowed!important;opacity:.58!important}
+@media(max-width:800px){.desktopMonthPicker{display:none}.mobileMonthPicker{position:sticky!important;top:8px;z-index:3000}.mobileMonthBtn{box-shadow:0 6px 18px rgba(0,0,0,.16)}main{padding-top:10px!important}.cards{gap:10px;margin:14px 0}.card{padding:16px}.value{font-size:24px}.summaryGrid{gap:10px;margin-bottom:10px}.compactSection{margin-top:10px}.clientCards{padding:10px!important}.clientCard{margin-bottom:12px!important}.clientCardHead{min-height:58px!important;padding:0 12px}.roomGrid{padding:12px!important}.top h1{font-size:24px}}
+</style>
+
+<style>
+/* v16.17 workspace PFA */
+.sideNav{margin:14px 10px 0;display:grid;gap:5px}.sideNavBtn{width:100%;border:0;background:transparent;color:#d1d5db;border-radius:9px;padding:11px 12px;text-align:left;font:750 13px Inter,Segoe UI,Arial,sans-serif;cursor:pointer}.sideNavBtn:hover,.sideNavBtn.active{background:#1d1d1d;color:#fff}.sideNavBtn span{display:inline-block;width:24px}.mobileWorkspaceBtn{display:none;border:0;background:#111;color:#fff;border-radius:12px;padding:12px 14px;font-weight:850;cursor:pointer}.workspaceOverlay{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:20000;display:none;align-items:center;justify-content:center;padding:20px}.workspaceOverlay.open{display:flex}.workspaceModal{width:min(900px,100%);max-height:88vh;overflow:auto;background:#f7f7f8;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.35)}.workspaceTop{position:sticky;top:0;z-index:2;background:#111;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center}.workspaceTop h2{margin:0;font-size:20px}.workspaceClose{border:0;background:#292929;color:#fff;border-radius:9px;width:36px;height:36px;font-size:20px;cursor:pointer}.workspaceTabs{display:flex;gap:7px;padding:12px 16px;background:#fff;border-bottom:1px solid #ddd;overflow:auto}.workspaceTab{border:1px solid #ddd;background:#fff;border-radius:999px;padding:8px 12px;white-space:nowrap;font-weight:800;cursor:pointer}.workspaceTab.active{background:#d71920;border-color:#d71920;color:#fff}.workspacePane{display:none;padding:18px}.workspacePane.active{display:block}.wsCard{background:#fff;border:1px solid #ddd;border-radius:13px;padding:15px;margin-bottom:10px}.wsHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.wsHead h3{margin:0}.wsUpload{display:flex;gap:8px;flex-wrap:wrap}.wsUpload select,.wsUpload input[type=text]{border:1px solid #ddd;border-radius:9px;padding:9px 10px}.wsFileRow,.wsTaskRow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid #eee}.wsMuted{font-size:12px;color:#777}.wsSetup{background:#fff8e8;border:1px solid #f1d28d;border-radius:12px;padding:12px 14px;color:#75530a;font-size:13px}.invoicePdfBtn{margin-left:6px}.mobileTopNav{display:none;gap:8px;margin-bottom:10px}.mobileTopNav .mobileMonthPicker{margin:0!important;flex:1}.mobileTopNav .mobileMonthBtn{height:48px}.mobileTopNav .mobileWorkspaceBtn{height:48px}.brandMark{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:8px;font-weight:950;line-height:1}.soloMark{background:#ffd900;color:#080808;border-radius:8px;padding:5px 9px;letter-spacing:-1px;font-size:15px}.mobiliartMark{background:#f2eee3;color:#304d3b;border:1px solid #d9d2bf;border-radius:8px;padding:5px 9px;font-size:15px;letter-spacing:-.4px}.collabBrandRow{display:flex;align-items:center;gap:8px}.workspaceTab .brandMark{margin-right:5px}.sideNavBtn .brandMark{width:auto;margin-right:6px}
+@media(max-width:800px){aside{display:none!important}.mobileMonthPicker{display:none!important}.mobileTopNav{display:flex}.mobileTopNav .mobileMonthPicker{display:block!important;position:relative!important;top:auto!important}.mobileWorkspaceBtn{display:block}.workspaceOverlay{padding:0;align-items:flex-end}.workspaceModal{width:100%;max-height:92vh;border-radius:18px 18px 0 0}.workspaceTabs{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:visible}.workspaceTab{white-space:normal;min-height:48px;border-radius:12px;padding:9px 8px}.workspacePane{padding:12px}.wsFileRow,.wsTaskRow{grid-template-columns:1fr auto}.wsFileRow .wsMuted{grid-column:1/-1}.top{gap:10px}.top>div:last-child{width:100%}.top>div:last-child button{flex:1}.top h1{font-size:28px!important}}
+</style>
 </head>
 <body>
 <div id="loginScreen" class="loginScreen">
@@ -618,12 +640,12 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 </div>
 <div id="loadingScreen" class="loadingScreen"><div class="spinner"></div><b>Se încarcă IMOS Projects…</b></div>
 <div class="app" id="app">
-<aside><div class="brand"><span>IMOS</span> Projects<div style="font-size:12px;font-weight:700;color:#c7cbd1;margin-top:7px;letter-spacing:.02em">MICLERU GEORGE PFA</div></div><div class="nav">REGISTRU LUNAR</div><div class="year">2026</div><div class="months" id="months"></div><div class="createdBy">Created by<strong>George Micleru</strong></div></aside>
+<aside><div class="brand"><span>IMOS</span> Projects<div style="font-size:12px;font-weight:700;color:#c7cbd1;margin-top:7px;letter-spacing:.02em">MICLERU GEORGE PFA</div></div><div class="nav">LUNA SELECTATĂ</div><div class="desktopMonthPicker"><button type="button" id="desktopMonthBtn" class="desktopMonthBtn">Septembrie 2026 <span>▼</span></button><div id="desktopMonthMenu" class="desktopMonthMenu"></div></div><div class="sideNav"><button class="sideNavBtn active" onclick="closeWorkspace()"><span>⌂</span>Dashboard</button><button class="sideNavBtn" onclick="openWorkspace('documents')"><span>📁</span>Documente</button><button class="sideNavBtn" onclick="openWorkspace('invoices')"><span class="brandMark soloMark">SOLO</span>Facturi</button><button class="sideNavBtn" onclick="openWorkspace('collabs')"><span>👥</span>Colaboratori</button><button class="sideNavBtn" onclick="openWorkspace('tasks')"><span>✓</span>De rezolvat</button><button class="sideNavBtn" onclick="openWorkspace('settings')"><span>⚙</span>Setări</button></div><div class="year">2026</div><div class="months" id="months"></div><div class="createdBy">Created by<strong>George Micleru</strong></div></aside>
 <main>
-<div class="mobileMonthPicker">
+<div class="mobileTopNav"><div class="mobileMonthPicker">
       <button type="button" id="mobileMonthBtn" class="mobileMonthBtn">Septembrie 2026 <span>▼</span></button>
       <div id="mobileMonthMenu" class="mobileMonthMenu"></div>
-    </div>
+    </div><button class="mobileWorkspaceBtn" type="button" onclick="openWorkspace('documents')">☰ Meniu</button></div>
     <div class="top"><div><h1 id="title">Septembrie 2026</h1><p>Centralizare clienți, încăperi și calcul comision</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">
 <button class="add" onclick="exportCSV()">Export CSV</button>
 <button class="add" onclick="exportPDF()">Export PDF</button>
@@ -688,6 +710,8 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 <div id="body" class="clientCards"></div>
 <div class="bottom"><button class="add" onclick="add()">＋ Client nou</button><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button id="finalizeMonthBtn" class="finalizeBtn" onclick="toggleFinalizeMonth()">✓ Finalizează luna</button><div class="total">Total de facturat: <span class="green" id="bill2">0 lei</span></div></div></div></div>
 </main></div>
+<div id="workspaceOverlay" class="workspaceOverlay" onclick="workspaceBackdrop(event)"><div class="workspaceModal"><div class="workspaceTop"><h2>Dosar PFA</h2><button class="workspaceClose" onclick="closeWorkspace()">×</button></div><div class="workspaceTabs"><button class="workspaceTab" data-tab="documents" onclick="switchWorkspace('documents')">📁 Documente</button><button class="workspaceTab" data-tab="invoices" onclick="switchWorkspace('invoices')"><span class="brandMark soloMark">SOLO</span> Facturi</button><button class="workspaceTab" data-tab="collabs" onclick="switchWorkspace('collabs')">👥 Colaboratori</button><button class="workspaceTab" data-tab="tasks" onclick="switchWorkspace('tasks')">✓ De rezolvat</button><button class="workspaceTab" data-tab="settings" onclick="switchWorkspace('settings')">⚙ Setări</button></div><div id="wsSetup" class="workspacePane"><div class="wsSetup">Secțiunea trebuie activată o singură dată în Supabase cu fișierul SQL inclus în această versiune.</div></div><div id="ws-documents" class="workspacePane"><div class="wsCard"><div class="wsHead"><h3>Documente PFA</h3><button class="primary" onclick="document.getElementById('pfaFileInput').click()">+ Încarcă document</button></div><div class="wsUpload"><select id="pfaFileCategory"><option>Contract</option><option>Act adițional</option><option>Alte documente</option></select><input id="pfaFileLabel" type="text" placeholder="Denumire / colaborator (opțional)"><input id="pfaFileInput" type="file" accept="application/pdf,image/*,.doc,.docx" style="display:none" onchange="uploadPfaFile(this.files[0]);this.value=''"></div><div id="pfaFileList"></div></div></div><div id="ws-invoices" class="workspacePane"><div class="wsCard"><div class="wsHead"><h3><span class="brandMark soloMark">SOLO</span> Facturi emise</h3></div><div class="wsMuted" style="margin-bottom:10px">Istoricul este același din dashboard. Poți atașa PDF-ul real al facturii.</div><div id="wsInvoiceList"></div></div></div><div id="ws-collabs" class="workspacePane"><div class="wsCard"><div class="wsHead"><h3>Colaboratori</h3></div><div id="wsCollabList"></div></div></div><div id="ws-tasks" class="workspacePane"><div class="wsCard"><div class="wsHead"><h3>De rezolvat</h3><button class="primary" onclick="addPfaTask()">+ Adaugă</button></div><div id="wsTaskList"></div></div></div><div id="ws-settings" class="workspacePane"><div class="wsCard"><h3>Setări rapide</h3><p class="wsMuted">Procent standard curent: <b id="wsRate">5%</b></p><p class="wsMuted">Țintă lunară: <b>350.000 lei</b></p><p class="wsMuted">An de lucru: <b>2026</b></p></div></div></div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://invtioenqiwrjnxghqqs.supabase.co";
@@ -697,7 +721,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const names=["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"];
 const seed=[["Dobrota 801A","Bucătărie",15944],["Cristache Camelia","Living",55498],["Visa","Living",27798],["Moscalu","Corp baie",2311],["Synapse","Dormitor",40429],["MOCIOI","Comodă living",8834],["MIHAILA","Bucătărie",43642],["HERA","Living",0],["HERA","Dorm. matrimonial",0],["HERA","Dorm. copil",0],["HERA","Hol",0]];
 const YEAR=2026, BUCKET="Documents";
-let month=8, data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={}, invoiceHistory=[], invoiceHistoryReady=true;
+let month=8, data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={}, invoiceHistory=[], invoiceHistoryReady=true, pfaFiles=[], pfaTasks=[], pfaWorkspaceReady=true;
 function finalKey(){return `imos_final_${user?.id||"local"}_${YEAR}_${month+1}`}
 function isMonthFinalized(){return localStorage.getItem(finalKey())==="1"}
 function updateFinalizeUI(){
@@ -802,6 +826,8 @@ async function refreshAll(){
   ]);
   if(ce||re||de){setCloud("eroare la sincronizare",true);console.error(ce||re||de);return}
   invoiceHistoryReady=!ie; invoiceHistory=inv||[]; window.invoiceHistoryError=ie||null; if(ie)console.warn("Istoric facturi indisponibil:",ie);
+  const [{data:pf,error:pfe},{data:pt,error:pte}]=await Promise.all([sb.from("pfa_files").select("*").order("created_at",{ascending:false}),sb.from("pfa_tasks").select("*").order("created_at",{ascending:false})]);
+  pfaWorkspaceReady=!(pfe||pte); pfaFiles=pf||[]; pfaTasks=pt||[]; window.pfaWorkspaceError=pfe||pte||null;
   clientsById=Object.fromEntries((cs||[]).map(c=>[c.id,c]));
   allRooms=rs||[];
   docsByRoom={}; (ds||[]).forEach(d=>(docsByRoom[d.room_id]??=[]).push(d));
@@ -840,8 +866,25 @@ function loadMonth(){
   title.textContent=names[month]+" "+YEAR; render();
 }
 function rateEl(){return document.getElementById("rate")}
-function renderMonths(){months.innerHTML=names.map((n,i)=>{const k=`imos_final_${user?.id||"local"}_${YEAR}_${i+1}`,done=localStorage.getItem(k)==="1";return `<button class="${i===month?'active':''}" onclick="selectMonth(${i})">${n}${done?" ✓":""}</button>`}).join("")}
-async function selectMonth(i){month=i;renderMonths();loadMonth()}
+function renderMonths(){
+  if(window.months) months.innerHTML=names.map((n,i)=>{const k=`imos_final_${user?.id||"local"}_${YEAR}_${i+1}`,done=localStorage.getItem(k)==="1";return `<button class="${i===month?'active':''}" onclick="selectMonth(${i})">${n}${done?" ✓":""}</button>`}).join("");
+  renderDesktopMonthPicker();
+}
+async function selectMonth(i){month=i;renderMonths();syncMobileMonthPicker();loadMonth()}
+function renderDesktopMonthPicker(){
+  const btn=document.getElementById("desktopMonthBtn"), menu=document.getElementById("desktopMonthMenu");
+  if(!btn||!menu)return;
+  btn.innerHTML=`${names[month]} ${YEAR} <span>▼</span>`;
+  menu.innerHTML=names.map((n,i)=>{const k=`imos_final_${user?.id||"local"}_${YEAR}_${i+1}`,done=localStorage.getItem(k)==="1";return `<button type="button" class="desktopMonthOption ${i===month?'active':''}" data-month="${i}">${n} ${YEAR}${done?'<span class="doneMark">✓</span>':''}</button>`}).join("");
+}
+function initDesktopMonthPicker(){
+  const btn=document.getElementById("desktopMonthBtn"), menu=document.getElementById("desktopMonthMenu");
+  if(!btn||!menu)return;
+  btn.onclick=e=>{e.stopPropagation();renderDesktopMonthPicker();menu.classList.toggle("open")};
+  menu.onclick=e=>{const opt=e.target.closest(".desktopMonthOption");if(!opt)return;menu.classList.remove("open");selectMonth(Number(opt.dataset.month))};
+  document.addEventListener("click",e=>{if(!e.target.closest(".desktopMonthPicker"))menu.classList.remove("open")});
+  renderDesktopMonthPicker();
+}
 let rateTimer;
 async function changeRate(){
   if(guardFinalized())return;
@@ -983,6 +1026,10 @@ function render(){
       <div class="statusCell"><button class="statusBtn ${r.pending?"pending":""}" onclick="togglePending(${i})">${r.pending?"În curs":"Finalizat"}</button></div>
       <div class="removeCell"><button class="remove" onclick="removeRow(${i})">×</button></div>
     </div>`).join("")}</div></section>`).join("");
+  // Blocare reală: lucrările finalizate dintr-o lună închisă nu pot fi editate nici pe desktop, nici pe mobil.
+  if(isMonthFinalized()){
+    body.querySelectorAll(".lockedRow input,.lockedRow select,.lockedRow button").forEach(el=>{el.disabled=true;el.setAttribute("aria-disabled","true")});
+  }
   calc();renderMonths();updateFinalizeUI();
 }
 function docHtml(r,i){
@@ -1066,13 +1113,32 @@ function renderInvoiceHistory(){
   const el=document.getElementById("invoiceHistoryList"); if(!el)return;
   if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; el.innerHTML='<div class="historyEmpty"><b>Eroare Supabase:</b> '+esc(e.message||'Eroare necunoscută')+(e.code?' <code>'+esc(e.code)+'</code>':'')+'</div>';return}
   if(!invoiceHistory.length){el.innerHTML='<div class="historyEmpty">Nu ai încă facturi înregistrate.</div>';return}
-  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${esc(x.invoice_date||"—")}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="printInvoiceSnapshot(${i})">Vezi centralizator</button></div></div>`).join("");
+  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${formatRoDate(x.invoice_date)}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="printInvoiceSnapshot(${i})">Vezi centralizator</button><button class="mini invoicePdfBtn" onclick="invoicePdfAction('${x.id}')">📎 PDF</button></div></div>`).join("");
 }
 function printInvoiceSnapshot(i){
   const x=invoiceHistory[i]; if(!x)return; const snap=Array.isArray(x.snapshot)?x.snapshot:[];
   const rows=snap.map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td style="text-align:right">${fmt(r.value)}</td><td style="text-align:right">${fmt(r.bill)}</td><td>${esc(r.note||"—")}</td></tr>`).join("");
-  const w=window.open("","_blank"); w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Centralizator ${esc(x.invoice_number||"")}</title><style>@page{size:A4 landscape;margin:14mm}body{font-family:Arial;color:#111}h1{color:#d71920}table{width:100%;border-collapse:collapse}th{background:#111;color:#fff}th,td{padding:8px;border-bottom:1px solid #ddd;font-size:11px}.total{text-align:right;font-size:16px;font-weight:bold;margin-top:18px}.red{color:#d71920}</style></head><body><div style="font-size:12px;font-weight:800">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div><h1>CENTRALIZATOR SERVICII PROIECTARE</h1><p>${esc(names[(Number(x.month)||1)-1])} ${x.year} · ${esc(x.collaborator||"")} · Factura ${esc(x.invoice_number||"")} · ${esc(x.invoice_date||"")}</p><table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead><tbody>${rows}</tbody></table><div class="total">Total: <span class="red">${fmt(x.amount)}</span></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`); w.document.close();
+  const w=window.open("","_blank"); w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Centralizator ${esc(x.invoice_number||"")}</title><style>@page{size:A4 landscape;margin:14mm}body{font-family:Arial;color:#111}h1{color:#d71920}table{width:100%;border-collapse:collapse}th{background:#111;color:#fff}th,td{padding:8px;border-bottom:1px solid #ddd;font-size:11px}.total{text-align:right;font-size:16px;font-weight:bold;margin-top:18px}.red{color:#d71920}</style>
+
+</head><body><div style="font-size:12px;font-weight:800">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div><h1>CENTRALIZATOR SERVICII PROIECTARE</h1><p>${esc(names[(Number(x.month)||1)-1])} ${x.year} · ${esc(x.collaborator||"")} · Factura ${esc(x.invoice_number||"")} · ${esc(x.invoice_date||"")}</p><table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead><tbody>${rows}</tbody></table><div class="total">Total: <span class="red">${fmt(x.amount)}</span></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`); w.document.close();
 }
+
+function formatRoDate(v){if(!v)return "—";const p=String(v).slice(0,10).split("-");return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:esc(v)}
+function openWorkspace(tab="documents"){document.getElementById("workspaceOverlay")?.classList.add("open");switchWorkspace(tab)}
+function closeWorkspace(){document.getElementById("workspaceOverlay")?.classList.remove("open")}
+function workspaceBackdrop(e){if(e.target?.id==="workspaceOverlay")closeWorkspace()}
+function switchWorkspace(tab){document.querySelectorAll(".workspaceTab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));document.querySelectorAll(".workspacePane").forEach(p=>p.classList.remove("active"));const id=pfaWorkspaceReady?"ws-"+tab:"wsSetup";document.getElementById(id)?.classList.add("active");renderWorkspace()}
+function renderWorkspace(){if(!pfaWorkspaceReady)return;const fl=document.getElementById("pfaFileList");if(fl)fl.innerHTML=pfaFiles.filter(x=>!x.invoice_id).map(x=>`<div class="wsFileRow"><div><b>${esc(x.category||"Document")}</b> · ${esc(x.label||x.file_name)}</div><span class="wsMuted">${formatRoDate(x.created_at)}</span><div><button class="mini" onclick="openPfaFile('${x.id}')">Deschide</button> <button class="mini" onclick="deletePfaFile('${x.id}')">×</button></div></div>`).join("")||'<div class="wsMuted" style="padding:14px 0">Nu ai încă documente încărcate.</div>';
+ const il=document.getElementById("wsInvoiceList");if(il)il.innerHTML=invoiceHistory.map(x=>{const f=pfaFiles.find(y=>y.invoice_id===x.id);return `<div class="wsFileRow"><div><b>${esc(x.invoice_number||"—")}</b> · ${(x.collaborator||"").trim().toUpperCase()==="VDM"?`<span class="brandMark mobiliartMark">MobiliΛrt</span>`:esc(x.collaborator||"—")}<div class="wsMuted">${formatRoDate(x.invoice_date)} · ${fmt(x.amount)}</div></div><span>${f?'PDF atașat':'Fără PDF'}</span><div>${f?`<button class="mini" onclick="openPfaFile('${f.id}')">Deschide PDF</button>`:`<button class="mini" onclick="invoicePdfAction('${x.id}')">+ Atașează PDF</button>`}</div></div>`}).join("")||'<div class="wsMuted">Nu ai facturi înregistrate.</div>';
+ const cl=document.getElementById("wsCollabList");if(cl){const m=new Map();allRooms.forEach(r=>{const n=(r.collaborator||"").trim();if(n)m.set(n,(m.get(n)||0)+1)});cl.innerHTML=[...m].map(([n,c])=>`<div class="wsFileRow"><div class="collabBrandRow">${n.toUpperCase()==="VDM"?`<span class="brandMark mobiliartMark">MobiliΛrt</span>`:`<b>${esc(n)}</b>`}<div class="wsMuted">${c} lucrări în baza de date</div></div><span></span><button class="mini" onclick="document.getElementById('pfaFileLabel').value='${esc(n)}';switchWorkspace('documents')">Documente</button></div>`).join("")||'<div class="wsMuted">Niciun colaborator.</div>'}
+ const tl=document.getElementById("wsTaskList");if(tl)tl.innerHTML=pfaTasks.map(t=>`<div class="wsTaskRow"><label><input type="checkbox" ${t.done?'checked':''} onchange="togglePfaTask('${t.id}',this.checked)"> <b style="${t.done?'text-decoration:line-through;color:#999':''}">${esc(t.title)}</b></label><button class="mini" onclick="deletePfaTask('${t.id}')">×</button></div>`).join("")||'<div class="wsMuted">Nu ai nimic de rezolvat.</div>';const wr=document.getElementById("wsRate");if(wr)wr.textContent=rate+"%"}
+async function uploadPfaFile(file,invoiceId=null){if(!file)return;if(!pfaWorkspaceReady){alert("Activează mai întâi secțiunea PFA în Supabase.");return}setLoading(true);const safe=file.name.replace(/[^\w.\-() ]+/g,"_");const path=`${user.id}/pfa/${invoiceId?'facturi':'documente'}/${Date.now()}_${safe}`;const {error:ue}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});if(ue){alert(ue.message);setLoading(false);return}const cat=invoiceId?"Factură SOLO":(document.getElementById("pfaFileCategory")?.value||"Document");const label=invoiceId?(invoiceHistory.find(x=>x.id===invoiceId)?.invoice_number||file.name):(document.getElementById("pfaFileLabel")?.value.trim()||file.name);const {error}=await sb.from("pfa_files").insert({user_id:user.id,category:cat,label,file_name:file.name,storage_path:path,invoice_id:invoiceId});if(error){await sb.storage.from(BUCKET).remove([path]);alert(error.message)}await refreshAll();setLoading(false);renderWorkspace()}
+async function openPfaFile(id){const f=pfaFiles.find(x=>x.id===id);if(!f)return;const {data:s,error}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,120);if(error){alert(error.message);return}window.open(s.signedUrl,"_blank","noopener")}
+async function deletePfaFile(id){const f=pfaFiles.find(x=>x.id===id);if(!f||!confirm("Ștergi documentul?"))return;await sb.storage.from(BUCKET).remove([f.storage_path]);const {error}=await sb.from("pfa_files").delete().eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
+function invoicePdfAction(invoiceId){const f=pfaFiles.find(x=>x.invoice_id===invoiceId);if(f){openPfaFile(f.id);return}const inp=document.createElement("input");inp.type="file";inp.accept="application/pdf";inp.onchange=()=>uploadPfaFile(inp.files[0],invoiceId);inp.click()}
+async function addPfaTask(){const t=prompt("Ce ai de rezolvat?");if(!t||!t.trim())return;const {error}=await sb.from("pfa_tasks").insert({user_id:user.id,title:t.trim(),done:false});if(error)alert(error.message);await refreshAll();renderWorkspace()}
+async function togglePfaTask(id,done){const {error}=await sb.from("pfa_tasks").update({done}).eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
+async function deletePfaTask(id){if(!confirm("Ștergi această notiță?"))return;const {error}=await sb.from("pfa_tasks").delete().eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
 
 function toggleCompact(id,btn){const el=document.getElementById(id);if(!el)return;el.classList.toggle("collapsed");if(btn)btn.classList.toggle("open",!el.classList.contains("collapsed"));}
 function updateCompactSummary(){
@@ -1342,11 +1408,13 @@ function exportPDF(){
 @media (min-width:1051px){
   .projectsHead > div:nth-child(3){text-align:left!important;transform:none!important;}
 }
-</style></head><body><div style="font-size:12px;font-weight:800;letter-spacing:.3px;margin-bottom:6px">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div>
+</style>
+
+</head><body><div style="font-size:12px;font-weight:800;letter-spacing:.3px;margin-bottom:6px">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div>
 <h1>CENTRALIZATOR SERVICII PROIECTARE</h1><div class="sub">${names[month]} ${YEAR}<br>Colaborator: ${(()=>{const c=(data.find(r=>(r.collaborator||"").trim())?.collaborator)||"—";return c.trim().toUpperCase()==="VDM"?"VDM MOBILIART SRL":esc(c)})()}</div><table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead><tbody>${rows}</tbody></table><div class="footer">Total de facturat: <span class="red">${fmt(billv)}</span></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script><div style="margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;line-height:1.45;color:#666">
 Centralizator întocmit pe baza situației centralizate a proiectelor pusă la dispoziție de Client, conform Contractului de prestări servicii și Actului adițional nr. 1. Sunt incluse exclusiv lucrările pentru care serviciile de proiectare au fost efectuate de Prestator.
 </div>
 </body></html>`);w.document.close();
 }
-renderMonths();initMobileMonthPicker();syncMobileMonthPicker();
+renderMonths();initDesktopMonthPicker();initMobileMonthPicker();syncMobileMonthPicker();
 </script></body></html>
