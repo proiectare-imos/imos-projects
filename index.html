@@ -800,7 +800,19 @@ function collabStorageName(v){const n=String(v||"").trim();return n.toUpperCase(
 function customCollabKey(){return `imos_custom_collabs_${user?.id||"local"}`}
 function getCustomCollabs(){try{return JSON.parse(localStorage.getItem(customCollabKey())||"[]").filter(Boolean)}catch(e){return []}}
 function saveCustomCollabs(a){localStorage.setItem(customCollabKey(),JSON.stringify([...new Set(a.map(x=>String(x).trim()).filter(Boolean))]))}
-function addCollaborator(){const n=prompt("Numele colaboratorului:");if(!n||!n.trim())return;const stored=collabStorageName(n);const a=getCustomCollabs();if(!a.some(x=>x.toUpperCase()===stored.toUpperCase()))a.push(stored);saveCustomCollabs(a);renderWorkspace()}
+function getCollaboratorChoices(){
+  const out=["VDM",...getCustomCollabs()];
+  allRooms.forEach(r=>{const n=(r.collaborator||"").trim();if(n)out.push(collabStorageName(n))});
+  const seen=new Set();
+  return out.filter(n=>{const k=String(n).trim().toUpperCase();if(!k||seen.has(k))return false;seen.add(k);return true});
+}
+function collaboratorOptions(current){
+  const cur=collabStorageName(current||"VDM")||"VDM";
+  const choices=getCollaboratorChoices();
+  if(!choices.some(x=>x.toUpperCase()===cur.toUpperCase()))choices.push(cur);
+  return choices.map(n=>`<option value="${esc(n)}" ${n.toUpperCase()===cur.toUpperCase()?"selected":""}>${esc(collabDisplayName(n))}</option>`).join("");
+}
+function addCollaborator(){const n=prompt("Numele colaboratorului:");if(!n||!n.trim())return;const stored=collabStorageName(n);const a=getCustomCollabs();if(!a.some(x=>x.toUpperCase()===stored.toUpperCase()))a.push(stored);saveCustomCollabs(a);renderWorkspace();render()}
 function removeCustomCollaborator(n){const used=allRooms.some(r=>(r.collaborator||"").trim().toUpperCase()===String(n).trim().toUpperCase());if(used){alert("Colaboratorul este folosit în lucrări și nu poate fi șters din listă.");return}if(!confirm(`Ștergi colaboratorul ${collabDisplayName(n)}?`))return;saveCustomCollabs(getCustomCollabs().filter(x=>x.toUpperCase()!==String(n).toUpperCase()));renderWorkspace()}
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1128,7 +1140,7 @@ function render(){
     <div class="clientButtons"><button class="mini" onclick="addRoom('${g.client_id}')">+ Încăpere</button><button class="mini editClient" onclick="renameClient('${g.client_id}')">✎</button><button class="mini deleteClient" title="Șterge clientul și toate lucrările lui" onclick="deleteClient('${g.client_id}')">🗑</button></div></div>
     <div class="clientRooms">${g.rows.map(({r,i})=>`<div class="roomGrid ${(!r.pending && isMonthFinalized())?"lockedRow":""}">
       <div class="roomName"><span class="arrow" aria-hidden="true"></span><input class="cell" value="${esc(r.room)}" title="${esc(r.room)}" placeholder="Încăpere" oninput="edit(${i},'room',this.value);this.title=this.value"></div>
-      <div class="collabCell"><input class="collabInput" value="${esc(collabDisplayName(r.collaborator))}" placeholder="Colaborator (ex. MobiliArt)" oninput="edit(${i},'collaborator',collabStorageName(this.value))"></div>
+      <div class="collabCell"><select class="collabInput" onchange="edit(${i},'collaborator',this.value);render()">${collaboratorOptions(r.collaborator)}</select></div>
       <div class="payCell"><div class="payBox"><select onchange="edit(${i},'payment_type',this.value);render()"><option value="percent" ${r.payment_type==="percent"?"selected":""}>Procent</option><option value="fixed" ${r.payment_type==="fixed"?"selected":""}>Sumă fixă</option></select>${r.payment_type==="fixed"?`<input type="number" step=".01" value="${r.fixed_fee||""}" placeholder="0" oninput="edit(${i},'fixed_fee',this.value)"><span class="paySuffix">lei</span>`:`<input type="number" step=".1" value="${r.commission_rate}" placeholder="5" oninput="edit(${i},'commission_rate',this.value)"><span class="paySuffix">%</span>`}</div></div>
       <div class="roomValue"><input class="cell right" type="number" step=".01" value="${r.value||""}" placeholder="0" oninput="edit(${i},'value',this.value)"><b>lei</b></div>
       <div class="roomCommission" id="c${i}">—</div>
