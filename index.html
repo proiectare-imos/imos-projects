@@ -522,6 +522,9 @@ aside{display:flex;flex-direction:column;min-height:100vh}
   .roomGrid .collabCell{transform:translateX(-12px)!important;}
 }
 
+.forgotBtn{border:0;background:transparent;color:#666;font-size:12px;font-weight:700;cursor:pointer;margin-top:9px;text-decoration:underline}
+.forgotBtn:hover{color:#d71920}
+#recoveryBox{border-top:1px solid #e5e5e5;margin-top:18px;padding-top:2px}
 </style>
 <style>
 /* v16.3 FINAL - mutare COLABORATOR spre stanga */
@@ -577,6 +580,9 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 @media(min-width:1051px){.roomName{position:relative}.roomName input:focus{position:relative;z-index:30;width:clamp(260px,32vw,520px)!important;min-width:260px!important;background:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.16);outline:1px solid #bbb!important}}
 @media(max-width:800px){.pendingSummary{align-items:flex-start;flex-direction:column}.pendingNumbers{text-align:left}.statusCell{grid-column:1 / -1!important}.statusBtn{width:100%;min-height:38px}}
 @media(min-width:1051px){.projectsHead,.roomGrid{grid-template-columns:minmax(175px,1.75fr) minmax(95px,1fr) minmax(130px,1.25fr) minmax(105px,.9fr) minmax(110px,.95fr) minmax(125px,1.15fr) minmax(105px,1fr) minmax(78px,.7fr) 32px!important}.projectsHead{padding-left:38px!important}.roomGrid{padding-left:38px!important}.statusCell{min-width:0}}
+
+/* v16.11 - istoric facturi */
+.invoiceHistoryList{padding:10px 18px 18px}.historyRow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #ececef}.historyRow:last-child{border-bottom:0}.historyMain{font-weight:900}.historyMeta{font-size:11px;color:#777;margin-top:3px}.historyAmount{font-weight:900;color:#15966a;text-align:right;white-space:nowrap}.historyEmpty{padding:12px 0;color:#777;font-size:13px}@media(max-width:800px){.historyRow{grid-template-columns:1fr auto}.historyRow>div:nth-child(2),.historyRow>div:nth-child(3){grid-column:1}.historyRow .historyAmount{grid-column:2;grid-row:1}.historyRow>div:last-child{grid-column:1/-1}.historyRow button{width:100%}}
 </style>
 
 </head>
@@ -591,7 +597,16 @@ aside{display:flex;flex-direction:column;min-height:100vh}
     <input id="loginPassword" type="password" placeholder="Parolă" autocomplete="current-password">
     <button class="primary loginBtn" onclick="login()">Intră în aplicație</button>
     <button class="add loginBtn" onclick="signup()">Creează cont</button>
+    <button class="forgotBtn" onclick="forgotPassword()">Am uitat parola</button>
     <div id="authMsg" class="authMsg"></div>
+    <div id="recoveryBox" style="display:none">
+      <h2 style="margin-top:22px">Setează parola nouă</h2>
+      <p>Introdu parola nouă pentru contul tău.</p>
+      <input id="newPassword" type="password" placeholder="Parolă nouă" autocomplete="new-password">
+      <input id="newPassword2" type="password" placeholder="Confirmă parola" autocomplete="new-password">
+      <button class="primary loginBtn" onclick="updatePassword()">Salvează parola nouă</button>
+      <div id="recoveryMsg" class="authMsg"></div>
+    </div>
   </div>
 </div>
 <div id="loadingScreen" class="loadingScreen"><div class="spinner"></div><b>Se încarcă IMOS Projects…</b></div>
@@ -664,6 +679,11 @@ aside{display:flex;flex-direction:column;min-height:100vh}
   <div class="invoiceHint">Textul pentru factură include automat luna selectată.</div>
 </div>
 
+<div class="panel invoicePanel" id="invoiceHistoryPanel">
+  <div class="panelhead"><div><strong>Istoric facturi</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Facturile înregistrate după emiterea lor în SOLO</div></div></div>
+  <div id="invoiceHistoryList" class="invoiceHistoryList"><div class="historyEmpty">Se încarcă…</div></div>
+</div>
+
 <div class="panel" style="margin-top:18px">
   <div class="panelhead">
     <div><strong>Evoluție anuală</strong><div style="font-size:12px;color:var(--muted);margin-top:4px">Suma de facturat pe fiecare lună</div></div>
@@ -699,7 +719,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const names=["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"];
 const seed=[["Dobrota 801A","Bucătărie",15944],["Cristache Camelia","Living",55498],["Visa","Living",27798],["Moscalu","Corp baie",2311],["Synapse","Dormitor",40429],["MOCIOI","Comodă living",8834],["MIHAILA","Bucătărie",43642],["HERA","Living",0],["HERA","Dorm. matrimonial",0],["HERA","Dorm. copil",0],["HERA","Hol",0]];
 const YEAR=2026, BUCKET="Documents";
-let month=8, data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={};
+let month=8, data=[], rate=5, user=null, allRooms=[], clientsById={}, docsByRoom={}, invoiceHistory=[], invoiceHistoryReady=true;
 function finalKey(){return `imos_final_${user?.id||"local"}_${YEAR}_${month+1}`}
 function isMonthFinalized(){return localStorage.getItem(finalKey())==="1"}
 function updateFinalizeUI(){
@@ -737,6 +757,26 @@ async function signup(){
   authMsg.style.color="#247044";
   authMsg.textContent=res.session?"Cont creat. Se deschide aplicația…":"Cont creat. Verifică emailul și confirmă contul, apoi autentifică-te.";
 }
+async function forgotPassword(){
+  authMsg.style.color="#d71920"; authMsg.textContent="";
+  const email=loginEmail.value.trim();
+  if(!email){authMsg.textContent="Introdu mai întâi adresa de email.";return}
+  const redirectTo=location.origin+location.pathname;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error){authMsg.textContent=error.message;return}
+  authMsg.style.color="#247044";
+  authMsg.textContent="Ți-am trimis emailul de resetare. Deschide linkul primit.";
+}
+async function updatePassword(){
+  recoveryMsg.style.color="#d71920"; recoveryMsg.textContent="";
+  const p1=newPassword.value, p2=newPassword2.value;
+  if(p1.length<6){recoveryMsg.textContent="Parola trebuie să aibă minimum 6 caractere.";return}
+  if(p1!==p2){recoveryMsg.textContent="Parolele nu coincid.";return}
+  const {error}=await sb.auth.updateUser({password:p1});
+  if(error){recoveryMsg.textContent=error.message;return}
+  recoveryMsg.style.color="#247044"; recoveryMsg.textContent="Parola a fost schimbată. Se deschide aplicația…";
+  setTimeout(async()=>{recoveryBox.style.display="none";const {data:{session}}=await sb.auth.getSession();await boot(session)},800);
+}
 async function logout(){await sb.auth.signOut()}
 async function boot(session){
   user=session?.user||null;
@@ -749,7 +789,18 @@ async function boot(session){
   await refreshAll();
   setLoading(false);
 }
-sb.auth.onAuthStateChange((event,session)=>{setTimeout(()=>boot(session),0)});
+sb.auth.onAuthStateChange((event,session)=>{
+  setTimeout(()=>{
+    if(event==="PASSWORD_RECOVERY"){
+      user=session?.user||null;
+      app.style.display="none"; loadingScreen.style.display="none"; loginScreen.style.display="flex";
+      recoveryBox.style.display="block";
+      authMsg.textContent="";
+      return;
+    }
+    boot(session);
+  },0)
+});
 (async()=>{const {data:{session}}=await sb.auth.getSession();await boot(session)})();
 
 async function ensureSeed(){
@@ -765,12 +816,14 @@ async function ensureSeed(){
 }
 async function refreshAll(){
   setCloud("se sincronizează…");
-  const [{data:cs,error:ce},{data:rs,error:re},{data:ds,error:de}]=await Promise.all([
+  const [{data:cs,error:ce},{data:rs,error:re},{data:ds,error:de},{data:inv,error:ie}]=await Promise.all([
     sb.from("clients").select("*").order("created_at"),
     sb.from("rooms").select("*").eq("year",YEAR).order("created_at"),
-    sb.from("documents").select("*").order("created_at")
+    sb.from("documents").select("*").order("created_at"),
+    sb.from("invoices").select("*").order("invoice_date",{ascending:false}).order("created_at",{ascending:false})
   ]);
   if(ce||re||de){setCloud("eroare la sincronizare",true);console.error(ce||re||de);return}
+  invoiceHistoryReady=!ie; invoiceHistory=inv||[]; if(ie)console.warn("Istoric facturi indisponibil:",ie.message);
   clientsById=Object.fromEntries((cs||[]).map(c=>[c.id,c]));
   allRooms=rs||[];
   docsByRoom={}; (ds||[]).forEach(d=>(docsByRoom[d.room_id]??=[]).push(d));
@@ -803,8 +856,9 @@ rateEl().removeAttribute("oninput"); rateEl().setAttribute("oninput","changeRate
 
 let editTimers={};
 function edit(i,field,v){
-  if(guardFinalized())return;
   const row=data[i]; if(!row)return;
+  // Lucrările „În curs” sunt globale și rămân editabile chiar dacă luna selectată este finalizată.
+  if(!row.pending && guardFinalized())return;
   if(field==="room")row.room=v; else if(field==="value")row.value=v===""?0:Number(String(v).replace(",", "."))||0; else if(field==="note")row.note=v;
   else if(field==="collaborator")row.collaborator=v; else if(field==="payment_type")row.payment_type=v;
   else if(field==="commission_rate")row.commission_rate=v===""?0:Number(String(v).replace(",", "."))||0;
@@ -831,22 +885,28 @@ async function add(){
   if(error)alert(error.message); await refreshAll(); setLoading(false);
 }
 async function addRoom(clientId){
-  if(guardFinalized())return;
+  const clientRows=data.filter(r=>r.client_id===clientId);
+  const addAsPending=clientRows.length>0 && clientRows.every(r=>r.pending);
+  if(!addAsPending && guardFinalized())return;
   const client=clientsById[clientId], room=prompt("Încăpere pentru "+(client?.name||"client")+":");
   if(room===null||!room.trim())return;
-  const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:clientId,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0});
+  const pendingNote=addAsPending?"[[IN_PROGRESS]] ":null;
+  const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:clientId,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0,notes:pendingNote});
   if(error)alert(error.message); await refreshAll();
 }
 async function renameClient(clientId){
-  if(guardFinalized())return;
+  const clientRows=data.filter(r=>r.client_id===clientId);
+  const pendingOnly=clientRows.length>0 && clientRows.every(r=>r.pending);
+  if(!pendingOnly && guardFinalized())return;
   const old=clientsById[clientId]?.name||"", n=prompt("Numele clientului:",old);
   if(n===null||!n.trim())return;
   const {error}=await sb.from("clients").update({name:n.trim()}).eq("id",clientId);
   if(error)alert(error.message); await refreshAll();
 }
 async function removeRow(i){
-  if(guardFinalized())return;
-  const row=data[i]; if(!row||!confirm("Ștergi această încăpere?"))return;
+  const row=data[i]; if(!row)return;
+  if(!row.pending && guardFinalized())return;
+  if(!confirm("Ștergi această încăpere?"))return;
   for(const d of (docsByRoom[row.id]||[])) await sb.storage.from(BUCKET).remove([d.storage_path]);
   await sb.from("documents").delete().eq("room_id",row.id);
   const {error}=await sb.from("rooms").delete().eq("id",row.id);
@@ -932,8 +992,8 @@ function docHtml(r,i){
 }
 function pickDoc(i){document.getElementById("file"+i).click()}
 async function storeDoc(i,file){
-  if(guardFinalized())return;
   if(!file)return; const row=data[i]; if(!row)return;
+  if(!row.pending && guardFinalized())return;
   setLoading(true);
   const safe=file.name.replace(/[^\w.\-() ]+/g,"_");
   const path=`${user.id}/${row.id}/${Date.now()}_${safe}`;
@@ -949,9 +1009,10 @@ async function openDoc(docId){
   if(error){alert(error.message);return} window.open(s.signedUrl,"_blank","noopener");
 }
 async function deleteDoc(docId){
-  if(guardFinalized())return;
-  if(!confirm("Ștergi documentul?"))return;
   const d=Object.values(docsByRoom).flat().find(x=>x.id===docId); if(!d)return;
+  const row=data.find(r=>r.id===d.room_id);
+  if(!row?.pending && guardFinalized())return;
+  if(!confirm("Ștergi documentul?"))return;
   await sb.storage.from(BUCKET).remove([d.storage_path]);
   const {error}=await sb.from("documents").delete().eq("id",docId);
   if(error)alert(error.message); await refreshAll();
@@ -982,15 +1043,42 @@ function renderInvoices(){
     <div class="invoiceActions">
       <button class="mini" onclick='copyText(${JSON.stringify(article)},"Textul articolului a fost copiat.")'>Copiază articol</button>
       <button class="mini" onclick='copyText(${JSON.stringify(String(g.total.toFixed(2)))},"Suma a fost copiată.")'>Copiază suma</button>
+      <button class="mini" onclick='registerInvoice(${JSON.stringify(g.name)})'>Înregistrează factura</button>
     </div>
   </div>`).join("");
+}
+async function registerInvoice(collaborator){
+  if(!invoiceHistoryReady){alert("Mai trebuie creat tabelul «invoices» în Supabase. Folosește fișierul SQL pe care ți l-am pregătit o singură dată.");return}
+  const rows=finalizedRows().filter(r=>(r.collaborator||"").trim()===collaborator);
+  if(!rows.length)return;
+  const total=rows.reduce((a,r)=>a+rowBill(r),0);
+  const nr=prompt("Numărul facturii din SOLO (ex. 001/2026):",""); if(nr===null||!nr.trim())return;
+  const today=new Date().toISOString().slice(0,10);
+  const dt=prompt("Data facturii (AAAA-LL-ZZ):",today); if(dt===null||!dt.trim())return;
+  const article=`Servicii de proiectare mobilier aferente lunii ${names[month].toLowerCase()} ${YEAR}, conform contractului și actului adițional`;
+  const snapshot=rows.map(r=>({client:r.client,room:r.room,value:Number(r.value)||0,bill:rowBill(r),note:r.note||"",payment_type:r.payment_type,commission_rate:r.commission_rate,fixed_fee:r.fixed_fee}));
+  if(!confirm(`Înregistrezi factura ${nr.trim()} · ${collaborator} · ${fmt(total)}?`))return;
+  const {error}=await sb.from("invoices").insert({user_id:user.id,year:YEAR,month:month+1,collaborator,invoice_number:nr.trim(),invoice_date:dt.trim(),amount:total,work_count:rows.length,article,snapshot});
+  if(error){alert("Nu am putut salva factura: "+error.message);return}
+  await refreshAll(); alert("Factura a fost înregistrată în istoric.");
+}
+function renderInvoiceHistory(){
+  const el=document.getElementById("invoiceHistoryList"); if(!el)return;
+  if(!invoiceHistoryReady){el.innerHTML='<div class="historyEmpty"><b>Istoricul nu este activat încă.</b> Trebuie creat o singură dată tabelul <code>invoices</code> în Supabase.</div>';return}
+  if(!invoiceHistory.length){el.innerHTML='<div class="historyEmpty">Nu ai încă facturi înregistrate.</div>';return}
+  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${esc(x.invoice_date||"—")}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="printInvoiceSnapshot(${i})">Vezi centralizator</button></div></div>`).join("");
+}
+function printInvoiceSnapshot(i){
+  const x=invoiceHistory[i]; if(!x)return; const snap=Array.isArray(x.snapshot)?x.snapshot:[];
+  const rows=snap.map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td style="text-align:right">${fmt(r.value)}</td><td style="text-align:right">${fmt(r.bill)}</td><td>${esc(r.note||"—")}</td></tr>`).join("");
+  const w=window.open("","_blank"); w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Centralizator ${esc(x.invoice_number||"")}</title><style>@page{size:A4 landscape;margin:14mm}body{font-family:Arial;color:#111}h1{color:#d71920}table{width:100%;border-collapse:collapse}th{background:#111;color:#fff}th,td{padding:8px;border-bottom:1px solid #ddd;font-size:11px}.total{text-align:right;font-size:16px;font-weight:bold;margin-top:18px}.red{color:#d71920}</style></head><body><div style="font-size:12px;font-weight:800">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div><h1>CENTRALIZATOR SERVICII PROIECTARE</h1><p>${esc(names[(Number(x.month)||1)-1])} ${x.year} · ${esc(x.collaborator||"")} · Factura ${esc(x.invoice_number||"")} · ${esc(x.invoice_date||"")}</p><table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead><tbody>${rows}</tbody></table><div class="total">Total: <span class="red">${fmt(x.amount)}</span></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`); w.document.close();
 }
 function calc(){
   let t=0,b=0,n=0,pt=0,pb=0;
   data.forEach((r,i)=>{let v=Number(r.value)||0,c=rowBill(r);if(r.pending){pt+=v;pb+=c}else{t+=v;b+=c;if(v)n++}let e=document.getElementById("c"+i);if(e)e.textContent=(v||c)?fmt(c):"—"});
   work.textContent=fmt(t);bill.textContent=bill2.textContent=fmt(b);nr.textContent=n;
   if(document.getElementById("pendingWork"))pendingWork.textContent=fmt(pt);if(document.getElementById("pendingBill"))pendingBill.textContent=fmt(pb);if(document.getElementById("pendingNet"))pendingNet.textContent=fmt(estimateNetMonthly(pb));
-  renderTarget(t);renderChart();taxCalc();renderInvoices();
+  renderTarget(t);renderChart();taxCalc();renderInvoices();renderInvoiceHistory();
 }
 function renderTarget(total){
   let color,text;
