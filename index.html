@@ -606,7 +606,7 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 
 <style>
 /* v16.14 visual cleanup */
-.summaryGrid{display:grid;grid-template-columns:minmax(0,3.2fr) minmax(260px,1fr);gap:16px;margin-bottom:18px}.summaryGrid #targetBox{margin:0!important;height:100%;box-sizing:border-box}.summaryGrid .monthCompare{margin:0!important;height:100%;box-sizing:border-box;align-items:center}.cards{gap:16px}.card{box-shadow:0 4px 16px rgba(17,24,39,.035)}.worksPanel{box-shadow:0 8px 26px rgba(17,24,39,.045)}.compactSection{background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden;box-shadow:0 6px 20px rgba(17,24,39,.04)}.compactHead{width:100%;min-height:68px;border:0;background:#fff;display:flex;align-items:center;gap:14px;padding:12px 18px;text-align:left;cursor:pointer;color:#111;font:inherit}.compactHead:hover{background:#fbfbfc}.compactHead strong{font-size:16px}.compactIcon{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;flex:0 0 38px}.compactIcon.purple,.compactIcon.violet{background:#f0edff;color:#5a4cff}.compactIcon.red{background:#fff0f1;color:#d71920}.compactIcon.blue{background:#edf5ff;color:#1877d2}.compactBadge{background:#f0edff;color:#5a4cff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900}.compactBadge.redBadge{background:#fff0f1;color:#d71920}.compactMeta{margin-left:10px;color:#536071;font-size:13px}.compactMeta b{color:#263246}.chev{margin-left:auto;font-size:24px;line-height:1;transition:.2s}.compactHead.open .chev{transform:rotate(180deg)}.compactBody{border-top:1px solid #eee}.compactBody.collapsed{display:none}.compactNote{padding:14px 18px;color:#6b7280;font-size:12px}.compactNote .pendingNet{float:right;color:#15966a}.invoicePanel{margin-top:14px!important}.invoiceList{padding:0 18px}.invoiceHint{padding:10px 18px 16px}.invoiceHistoryList{padding:0 18px 12px}.searchWrap{margin-bottom:10px!important}#cloudBar{margin-bottom:16px!important}.top{margin-bottom:10px!important}
+.summaryGrid{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:18px}.summaryGrid #targetBox{margin:0!important;height:100%;box-sizing:border-box}.summaryGrid .monthCompare{margin:0!important;height:100%;box-sizing:border-box;align-items:center}.cards{gap:16px}.card{box-shadow:0 4px 16px rgba(17,24,39,.035)}.worksPanel{box-shadow:0 8px 26px rgba(17,24,39,.045)}.compactSection{background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:14px;overflow:hidden;box-shadow:0 6px 20px rgba(17,24,39,.04)}.compactHead{width:100%;min-height:68px;border:0;background:#fff;display:flex;align-items:center;gap:14px;padding:12px 18px;text-align:left;cursor:pointer;color:#111;font:inherit}.compactHead:hover{background:#fbfbfc}.compactHead strong{font-size:16px}.compactIcon{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;flex:0 0 38px}.compactIcon.purple,.compactIcon.violet{background:#f0edff;color:#5a4cff}.compactIcon.red{background:#fff0f1;color:#d71920}.compactIcon.blue{background:#edf5ff;color:#1877d2}.compactBadge{background:#f0edff;color:#5a4cff;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900}.compactBadge.redBadge{background:#fff0f1;color:#d71920}.compactMeta{margin-left:10px;color:#536071;font-size:13px}.compactMeta b{color:#263246}.chev{margin-left:auto;font-size:24px;line-height:1;transition:.2s}.compactHead.open .chev{transform:rotate(180deg)}.compactBody{border-top:1px solid #eee}.compactBody.collapsed{display:none}.compactNote{padding:14px 18px;color:#6b7280;font-size:12px}.compactNote .pendingNet{float:right;color:#15966a}.invoicePanel{margin-top:14px!important}.invoiceList{padding:0 18px}.invoiceHint{padding:10px 18px 16px}.invoiceHistoryList{padding:0 18px 12px}.searchWrap{margin-bottom:10px!important}#cloudBar{margin-bottom:16px!important}.top{margin-bottom:10px!important}
 @media(max-width:900px){.summaryGrid{grid-template-columns:1fr}.compactMeta{display:none}.compactHead{min-height:60px;padding:10px 12px}.compactNote .pendingNet{float:none;display:block;margin-top:6px}}
 </style>
 
@@ -970,6 +970,29 @@ async function renameClient(clientId){
   const {error}=await sb.from("clients").update({name:n.trim()}).eq("id",clientId);
   if(error)alert(error.message); await refreshAll();
 }
+async function deleteClient(clientId){
+  const client=clientsById[clientId];
+  if(!client)return;
+  const rows=allRooms.filter(r=>r.client_id===clientId);
+  const label=client.name||"Client";
+  if(!confirm(`Ștergi clientul „${label}” și toate cele ${rows.length} lucrări asociate?\n\nAceastă acțiune nu poate fi anulată.`))return;
+  setLoading(true);
+  try{
+    for(const row of rows){
+      for(const d of (docsByRoom[row.id]||[])){
+        if(d.storage_path) await sb.storage.from(BUCKET).remove([d.storage_path]);
+      }
+      const {error:de}=await sb.from("documents").delete().eq("room_id",row.id);
+      if(de)throw de;
+    }
+    const {error:re}=await sb.from("rooms").delete().eq("client_id",clientId);
+    if(re)throw re;
+    const {error:ce}=await sb.from("clients").delete().eq("id",clientId);
+    if(ce)throw ce;
+    await refreshAll();
+  }catch(e){alert("Nu am putut șterge clientul: "+(e?.message||e));}
+  finally{setLoading(false);}
+}
 async function removeRow(i){
   const row=data[i]; if(!row)return;
   if(!row.pending && guardFinalized())return;
@@ -1053,7 +1076,7 @@ function render(){
   });
   body.innerHTML=groups.map(g=>`<section class="clientCard">
     <div class="clientCardHead"><div class="clientTitle"><span>CLIENT</span><strong>${esc(g.client)}</strong></div>
-    <div class="clientButtons"><button class="mini" onclick="addRoom('${g.client_id}')">+ Încăpere</button><button class="mini editClient" onclick="renameClient('${g.client_id}')">✎</button></div></div>
+    <div class="clientButtons"><button class="mini" onclick="addRoom('${g.client_id}')">+ Încăpere</button><button class="mini editClient" onclick="renameClient('${g.client_id}')">✎</button><button class="mini deleteClient" title="Șterge clientul și toate lucrările lui" onclick="deleteClient('${g.client_id}')">🗑</button></div></div>
     <div class="clientRooms">${g.rows.map(({r,i})=>`<div class="roomGrid ${(!r.pending && isMonthFinalized())?"lockedRow":""}">
       <div class="roomName"><span class="arrow" aria-hidden="true"></span><input class="cell" value="${esc(r.room)}" title="${esc(r.room)}" placeholder="Încăpere" oninput="edit(${i},'room',this.value);this.title=this.value"></div>
       <div class="collabCell"><input class="collabInput" value="${esc(r.collaborator)}" placeholder="Colaborator (ex. VDM)" oninput="edit(${i},'collaborator',this.value)"></div>
