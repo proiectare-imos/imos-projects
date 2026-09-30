@@ -939,7 +939,8 @@ async function saveRoom(row){
   if(error)setCloud("eroare la salvare",true);else{let x=allRooms.find(r=>r.id===row.id);if(x)Object.assign(x,patch);setCloud("salvat online")}
 }
 async function add(){
-  if(guardFinalized())return;
+  // Un client nou începe întotdeauna ca lucrare ÎN CURS, indiferent de filtrul activ.
+  // Lucrările în curs sunt globale și nu depind de luna selectată.
   const name=prompt("Numele clientului:"); if(name===null||!name.trim())return;
   const room=prompt("Prima încăpere / proiect:"); if(room===null)return;
   setLoading(true);
@@ -948,8 +949,13 @@ async function add(){
     const {data:c,error}=await sb.from("clients").insert({user_id:user.id,name:name.trim()}).select().single();
     if(error){alert(error.message);setLoading(false);return} client=c;
   }
-  const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:client.id,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0});
-  if(error)alert(error.message); await refreshAll(); setLoading(false);
+  const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:client.id,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0,notes:"[[IN_PROGRESS]] "});
+  if(error)alert(error.message);
+  else {
+    // După adăugare, arată imediat clientul nou în lista „În curs”.
+    roomView="pending";
+  }
+  await refreshAll(); setLoading(false);
 }
 async function addRoom(clientId){
   const clientRows=data.filter(r=>r.client_id===clientId);
@@ -957,9 +963,12 @@ async function addRoom(clientId){
   if(!addAsPending && guardFinalized())return;
   const client=clientsById[clientId], room=prompt("Încăpere pentru "+(client?.name||"client")+":");
   if(room===null||!room.trim())return;
-  const pendingNote=addAsPending?"[[IN_PROGRESS]] ":null;
+  // O încăpere nouă este întotdeauna o lucrare în curs. Nu depinde de filtrul activ.
+  const pendingNote="[[IN_PROGRESS]] ";
   const {error}=await sb.from("rooms").insert({user_id:user.id,client_id:clientId,year:YEAR,month:month+1,room_name:room.trim(),work_value:0,commission_rate:rate,collaborator:"VDM",payment_type:"percent",fixed_fee:0,notes:pendingNote});
-  if(error)alert(error.message); await refreshAll();
+  if(error)alert(error.message);
+  else roomView="pending";
+  await refreshAll();
 }
 async function renameClient(clientId){
   const clientRows=data.filter(r=>r.client_id===clientId);
