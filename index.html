@@ -823,7 +823,7 @@ async function refreshAll(){
     sb.from("invoices").select("*").order("invoice_date",{ascending:false}).order("created_at",{ascending:false})
   ]);
   if(ce||re||de){setCloud("eroare la sincronizare",true);console.error(ce||re||de);return}
-  invoiceHistoryReady=!ie; invoiceHistory=inv||[]; if(ie)console.warn("Istoric facturi indisponibil:",ie.message);
+  invoiceHistoryReady=!ie; invoiceHistory=inv||[]; window.invoiceHistoryError=ie||null; if(ie)console.warn("Istoric facturi indisponibil:",ie);
   clientsById=Object.fromEntries((cs||[]).map(c=>[c.id,c]));
   allRooms=rs||[];
   docsByRoom={}; (ds||[]).forEach(d=>(docsByRoom[d.room_id]??=[]).push(d));
@@ -1048,7 +1048,7 @@ function renderInvoices(){
   </div>`).join("");
 }
 async function registerInvoice(collaborator){
-  if(!invoiceHistoryReady){alert("Mai trebuie creat tabelul «invoices» în Supabase. Folosește fișierul SQL pe care ți l-am pregătit o singură dată.");return}
+  if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; alert("Eroare Supabase la istoricul facturilor:\n\n"+(e.message||"Eroare necunoscută")+(e.code?"\nCod: "+e.code:"")+(e.details?"\nDetalii: "+e.details:"")+(e.hint?"\nHint: "+e.hint:""));return}
   const rows=finalizedRows().filter(r=>(r.collaborator||"").trim()===collaborator);
   if(!rows.length)return;
   const total=rows.reduce((a,r)=>a+rowBill(r),0);
@@ -1064,7 +1064,7 @@ async function registerInvoice(collaborator){
 }
 function renderInvoiceHistory(){
   const el=document.getElementById("invoiceHistoryList"); if(!el)return;
-  if(!invoiceHistoryReady){el.innerHTML='<div class="historyEmpty"><b>Istoricul nu este activat încă.</b> Trebuie creat o singură dată tabelul <code>invoices</code> în Supabase.</div>';return}
+  if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; el.innerHTML='<div class="historyEmpty"><b>Eroare Supabase:</b> '+esc(e.message||'Eroare necunoscută')+(e.code?' <code>'+esc(e.code)+'</code>':'')+'</div>';return}
   if(!invoiceHistory.length){el.innerHTML='<div class="historyEmpty">Nu ai încă facturi înregistrate.</div>';return}
   el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${esc(x.invoice_date||"—")}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="printInvoiceSnapshot(${i})">Vezi centralizator</button></div></div>`).join("");
 }
