@@ -525,6 +525,8 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 .forgotBtn{border:0;background:transparent;color:#666;font-size:12px;font-weight:700;cursor:pointer;margin-top:9px;text-decoration:underline}
 .forgotBtn:hover{color:#d71920}
 #recoveryBox{border-top:1px solid #e5e5e5;margin-top:18px;padding-top:2px}
+
+.searchWrap{position:relative;margin:0 0 18px}.globalSearch{width:100%;box-sizing:border-box;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 42px 12px 15px;font:inherit;font-size:14px;outline:none}.globalSearch:focus{border-color:#aaa;box-shadow:0 0 0 3px rgba(0,0,0,.04)}.searchClear{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;font-size:20px;color:#999;cursor:pointer;display:none}.searchResults{position:absolute;z-index:80;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,.12);max-height:360px;overflow:auto;display:none}.searchResult{padding:11px 14px;border-bottom:1px solid #eee;cursor:pointer;display:flex;justify-content:space-between;gap:16px;align-items:center}.searchResult:last-child{border-bottom:0}.searchResult:hover{background:#f7f7f8}.searchResult strong{display:block;font-size:13px}.searchResult small{display:block;color:#777;margin-top:3px}.searchMeta{font-size:11px;font-weight:800;color:#666;white-space:nowrap}.searchEmpty{padding:14px;color:#777;font-size:12px}
 </style>
 <style>
 /* v16.3 FINAL - mutare COLABORATOR spre stanga */
@@ -622,6 +624,7 @@ aside{display:flex;flex-direction:column;min-height:100vh}
 <button class="add" onclick="exportPDF()">Export PDF</button>
 <button class="primary" onclick="add()">+ Client nou</button>
 </div></div>
+<div class="searchWrap" id="searchWrap"><input id="globalSearch" class="globalSearch" type="search" autocomplete="off" placeholder="🔍 Caută client sau încăpere în toate lunile…" oninput="globalSearchInput(this.value)"><button id="searchClear" class="searchClear" type="button" onclick="clearGlobalSearch()">×</button><div id="searchResults" class="searchResults"></div></div>
 <div id="cloudBar" style="margin:0 0 18px;padding:11px 14px;border-radius:10px;background:#f4fff8;border:1px solid #b9dfc7;font-size:12px;color:#245c38;display:flex;justify-content:space-between;align-items:center;gap:12px">
   <div><b>☁ Online:</b> <span id="cloudStatus">conectat la Supabase</span></div>
   <div style="display:flex;align-items:center;gap:10px"><span id="userEmail" style="color:#666"></span><button class="add" onclick="logout()">Ieșire</button></div>
@@ -829,6 +832,28 @@ async function refreshAll(){
   docsByRoom={}; (ds||[]).forEach(d=>(docsByRoom[d.room_id]??=[]).push(d));
   loadMonth(); setCloud("salvat online");
 }
+function roomPendingRaw(r){return String(r.notes||"").startsWith("[[IN_PROGRESS]]")}
+function globalSearchInput(q){
+  const box=document.getElementById("searchResults"), clear=document.getElementById("searchClear");
+  if(!box)return; q=(q||"").trim().toLowerCase(); clear.style.display=q?"block":"none";
+  if(q.length<2){box.style.display="none";box.innerHTML="";return}
+  const hits=allRooms.filter(r=>{
+    const client=clientsById[r.client_id]?.name||"";
+    return client.toLowerCase().includes(q)||String(r.room_name||"").toLowerCase().includes(q);
+  }).slice(0,30);
+  if(!hits.length){box.innerHTML='<div class="searchEmpty">Niciun rezultat.</div>';box.style.display="block";return}
+  box.innerHTML=hits.map(r=>{
+    const pending=roomPendingRaw(r), client=clientsById[r.client_id]?.name||"Client", m=Math.max(1,Math.min(12,Number(r.month)||1));
+    return `<div class="searchResult" onclick="openSearchResult('${r.id}',${m-1})"><div><strong>${esc(client)} → ${esc(r.room_name||"Fără denumire")}</strong><small>${pending?"Lucrare în curs":"Lucrare finalizată"}</small></div><div class="searchMeta">${pending?"ÎN CURS":names[m-1]+" "+YEAR}</div></div>`;
+  }).join(""); box.style.display="block";
+}
+function clearGlobalSearch(){const i=document.getElementById("globalSearch"),b=document.getElementById("searchResults"),c=document.getElementById("searchClear");if(i)i.value="";if(b){b.style.display="none";b.innerHTML=""}if(c)c.style.display="none";if(i)i.focus()}
+function openSearchResult(id,targetMonth){
+  const r=allRooms.find(x=>String(x.id)===String(id)); if(!r)return;
+  month=roomPendingRaw(r)?month:targetMonth; clearGlobalSearch(); renderMonths(); loadMonth();
+  setTimeout(()=>{const idx=data.findIndex(x=>String(x.id)===String(id));if(idx<0)return;const el=document.querySelectorAll('.roomGrid')[idx];if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.animate([{background:'#fff3bf'},{background:'#fff'}],{duration:1500})}},80);
+}
+document.addEventListener('click',e=>{const w=document.getElementById('searchWrap');if(w&&!w.contains(e.target)){const b=document.getElementById('searchResults');if(b)b.style.display='none'}});
 function loadMonth(){
   const m=month+1;
   // Lucrările finalizate apar doar în luna lor; lucrările ÎN CURS apar în orice lună selectată.
