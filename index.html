@@ -82,6 +82,16 @@ input.cell{border:0;background:transparent;padding:7px;width:100%;font:inherit;f
 @keyframes spin{to{transform:rotate(360deg)}}#app{display:none}
 
 
+.nextMini{margin:-8px 0 14px;padding:10px 14px;border:1px solid #e6e6e6;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:#666}.nextMini>div:first-child{display:flex;align-items:center;gap:7px;color:#222}.nextDot{width:7px;height:7px;border-radius:50%;background:#d71920;display:inline-block}.nextStats{display:flex;gap:16px;flex-wrap:wrap}.nextStats b{color:#111;margin-right:3px}@media(max-width:800px){.nextMini{align-items:flex-start;flex-direction:column}.nextStats{width:100%;justify-content:space-between;gap:7px;font-size:10px}}
+
+/* ===== WORK VIEW TABS ===== */
+.workTabs{display:flex;align-items:center;gap:5px;background:#f3f3f3;border:1px solid #e2e2e2;border-radius:10px;padding:3px}
+.workTab{border:0;background:transparent;padding:7px 10px;border-radius:7px;font:800 11px Arial;color:#666;cursor:pointer;white-space:nowrap}
+.workTab span{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;margin-left:4px;border-radius:9px;background:#fff;color:#777;font-size:10px}
+.workTab.active{background:#111;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.workTab.active span{color:#111}
+@media (max-width:800px){.workTabs{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.workTab{padding:8px 5px;font-size:10px}.panelhead .rate{width:100%}}
+
 /* ===== MOBILE FIX 2026-09 ===== */
 @media (max-width: 800px){
   main{padding:18px 10px}
@@ -661,6 +671,7 @@ aside .year,aside .months{display:none}
 <div class="card"><div class="label">De facturat</div><div class="value green" id="bill">0 lei</div></div>
 <div class="card"><div class="label">Proiecte cu valoare</div><div class="value" id="nr">0</div></div>
 </div>
+<div class="nextMini" id="nextMini"><div><span class="nextDot"></span><strong>Ce urmează</strong></div><div class="nextStats"><span><b id="nextPendingCount">0</b> în curs</span><span><b id="nextPendingValue">0 lei</b> valoare</span><span><b id="nextPendingBill">0 lei</b> de facturat</span></div></div>
 <div class="summaryGrid"><div id="targetBox" style="margin:-8px 0 20px;background:white;border:1px solid var(--line);border-radius:14px;padding:16px 20px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
     <div>
@@ -696,7 +707,7 @@ aside .year,aside .months{display:none}
 
 <div class="compactSection"><button class="compactHead" type="button" onclick="toggleCompact('netBody',this)"><span class="compactIcon red">◉</span><strong>Cât îmi rămâne în mână</strong><span class="compactMeta">Estimare: <b id="netHandCompact">0 lei</b></span><span class="chev">⌄</span></button><div id="netBody" class="compactBody collapsed"><div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px"><div class="card" style="padding:17px"><div class="label">Comision brut</div><div class="value" id="grossHand" style="font-size:24px">0 lei</div></div><div class="card" style="padding:17px"><div class="label">Taxe estimate</div><div class="value" id="taxHand" style="font-size:24px">0 lei</div></div><div class="card" style="padding:17px;border:2px solid #d71920"><div class="label">Bani în mână</div><div class="value green" id="netHand" style="font-size:24px">0 lei</div></div></div><div style="padding:0 20px 18px;font-size:12px;color:#777">Estimare orientativă: presupune că venitul lunar selectat se menține aproximativ la același nivel pe parcursul anului.</div></div></div>
 
-<div class="panel worksPanel"><div class="panelhead"><strong>Lucrările lunii</strong><div class="rate">Procent standard <input id="rate" type="number" step=".1" value="5" oninput="save();render()"> %</div></div>
+<div class="panel worksPanel"><div class="panelhead"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><strong>Lucrările lunii</strong><div class="workTabs"><button type="button" class="workTab" id="workTabPending" onclick="setRoomView('pending')">În curs <span id="workPendingCount">0</span></button><button type="button" class="workTab" id="workTabFinalized" onclick="setRoomView('finalized')">Finalizate <span id="workFinalizedCount">0</span></button><button type="button" class="workTab" id="workTabAll" onclick="setRoomView('all')">Toate <span id="workAllCount">0</span></button></div></div><div class="rate">Procent standard <input id="rate" type="number" step=".1" value="5" oninput="save();render()"> %</div></div>
 <div class="projectsHead">
   <div>ÎNCĂPERE</div>
   <div>COLABORATOR</div>
@@ -1005,11 +1016,18 @@ async function togglePending(i){
     loadMonth();
   }
 }
+let roomView="pending";
+function setRoomView(view){roomView=view;render()}
 function finalizedRows(){return data.filter(r=>!r.pending)}
 function render(){
   syncMobileMonthPicker();
+  const pendingCount=data.filter(r=>r.pending).length, finalizedCount=data.filter(r=>!r.pending).length;
+  const pEl=document.getElementById("workPendingCount"), fEl=document.getElementById("workFinalizedCount"), aEl=document.getElementById("workAllCount");
+  if(pEl)pEl.textContent=pendingCount; if(fEl)fEl.textContent=finalizedCount; if(aEl)aEl.textContent=data.length;
+  ["workTabPending","workTabFinalized","workTabAll"].forEach(id=>{const b=document.getElementById(id);if(b)b.classList.toggle("active",id===(roomView==='pending'?"workTabPending":roomView==='finalized'?"workTabFinalized":"workTabAll"))});
+  let visible=data.map((r,i)=>({r,i})).filter(x=>roomView==='pending'?x.r.pending:roomView==='finalized'?!x.r.pending:true);
   let groups=[],map={};
-  data.forEach((r,i)=>{
+  visible.forEach(({r,i})=>{
     if(!map[r.client_id]){map[r.client_id]={client:r.client,client_id:r.client_id,rows:[]};groups.push(map[r.client_id])}
     map[r.client_id].rows.push({r,i});
   });
@@ -1159,6 +1177,8 @@ function calc(){
   let t=0,b=0,n=0,pt=0,pb=0;
   data.forEach((r,i)=>{let v=Number(r.value)||0,c=rowBill(r);if(r.pending){pt+=v;pb+=c}else{t+=v;b+=c;if(v)n++}let e=document.getElementById("c"+i);if(e)e.textContent=(v||c)?fmt(c):"—"});
   work.textContent=fmt(t);bill.textContent=bill2.textContent=fmt(b);nr.textContent=n;
+  const np=document.getElementById("nextPendingCount"), nv=document.getElementById("nextPendingValue"), nb=document.getElementById("nextPendingBill");
+  if(np)np.textContent=data.filter(r=>r.pending).length; if(nv)nv.textContent=fmt(pt); if(nb)nb.textContent=fmt(pb);
   if(document.getElementById("pendingWork"))pendingWork.textContent=fmt(pt);if(document.getElementById("pendingBill"))pendingBill.textContent=fmt(pb);if(document.getElementById("pendingNet"))pendingNet.textContent=fmt(estimateNetMonthly(pb));
   renderTarget(t);renderChart();taxCalc();renderInvoices();renderInvoiceHistory();updateCompactSummary();
 }
@@ -1231,6 +1251,16 @@ function exportPDF(){
   let total=finalizedRows().reduce((a,r)=>a+(Number(r.value)||0),0),billv=finalizedRows().reduce((a,r)=>a+rowBill(r),0);
   let rows=finalizedRows().map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td class="num">${r.value?fmt(r.value):"—"}</td><td class="num">${fmt(rowBill(r))}</td><td class="notes">${esc(r.note||"—")}</td></tr>`).join("");
   let w=window.open("","_blank");w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>IMOS ${names[month]} ${YEAR}</title><style>@page{size:A4;margin:16mm}body{font-family:Arial;color:#111}h1{color:#d71920}.sub{color:#666;margin-bottom:20px}table{width:100%;border-collapse:collapse}th{background:#111;color:#fff}th,td{padding:8px 6px;border-bottom:1px solid #ddd;vertical-align:top;font-size:10px}th:nth-child(1){width:18%}th:nth-child(2){width:17%}th:nth-child(3){width:17%}th:nth-child(4){width:17%}th:nth-child(5){width:31%}.notes{white-space:pre-wrap;overflow-wrap:anywhere}.num{text-align:right;white-space:nowrap}.footer{text-align:right;font-weight:bold;margin-top:18px}.red{color:#d71920}
+.nextMini{margin:-8px 0 14px;padding:10px 14px;border:1px solid #e6e6e6;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:#666}.nextMini>div:first-child{display:flex;align-items:center;gap:7px;color:#222}.nextDot{width:7px;height:7px;border-radius:50%;background:#d71920;display:inline-block}.nextStats{display:flex;gap:16px;flex-wrap:wrap}.nextStats b{color:#111;margin-right:3px}@media(max-width:800px){.nextMini{align-items:flex-start;flex-direction:column}.nextStats{width:100%;justify-content:space-between;gap:7px;font-size:10px}}
+
+/* ===== WORK VIEW TABS ===== */
+.workTabs{display:flex;align-items:center;gap:5px;background:#f3f3f3;border:1px solid #e2e2e2;border-radius:10px;padding:3px}
+.workTab{border:0;background:transparent;padding:7px 10px;border-radius:7px;font:800 11px Arial;color:#666;cursor:pointer;white-space:nowrap}
+.workTab span{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;margin-left:4px;border-radius:9px;background:#fff;color:#777;font-size:10px}
+.workTab.active{background:#111;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.workTab.active span{color:#111}
+@media (max-width:800px){.workTabs{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.workTab{padding:8px 5px;font-size:10px}.panelhead .rate{width:100%}}
+
 /* ===== MOBILE FIX 2026-09 ===== */
 @media (max-width: 800px){
   main{padding:18px 10px}
