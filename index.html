@@ -673,6 +673,42 @@ body[data-theme="light"] .brand .imosBrandText{color:#111}
 /* v16.33 - registru documente + numerotare + legatura proiecte extra */
 .docRegistry{margin-top:18px;border-top:1px solid #eee;padding-top:16px}.docRegistryRow{display:grid;grid-template-columns:1.25fr 1fr .8fr .8fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #eee}.docStatus{border:1px solid #ddd;border-radius:8px;padding:7px 8px;font-weight:800;background:#fff}.docStatus.draft{background:#f5f5f5}.docStatus.sign{background:#fff7e6}.docStatus.signed{background:#eefaf5;color:#167253}.docRegistryActions{display:flex;gap:5px;justify-content:flex-end}.docNumberHint{font-size:10px;color:#777;margin-top:4px}.extraDocBtn{white-space:nowrap}@media(max-width:800px){.docRegistryRow{grid-template-columns:1fr auto}.docRegistryRow>div:nth-child(2),.docRegistryRow>div:nth-child(3){grid-column:1}.docRegistryActions{grid-column:1/-1;justify-content:stretch}.docRegistryActions button{flex:1}}
 </style>
+
+<style id="v1645-dark-complete-fix">
+/* v16.45 - dark theme: eliminate remaining light surfaces */
+body[data-theme="dark"] #cloudBar,
+body[data-theme="dark"] .nextMini,
+body[data-theme="dark"] #targetBox,
+body[data-theme="dark"] .monthCompare,
+body[data-theme="dark"] .extraDash,
+body[data-theme="dark"] .extraDashBtn,
+body[data-theme="dark"] .compactSection,
+body[data-theme="dark"] .compactHead,
+body[data-theme="dark"] .compactBody,
+body[data-theme="dark"] .worksPanel,
+body[data-theme="dark"] .invoicePanel,
+body[data-theme="dark"] .historyPanel,
+body[data-theme="dark"] .annualPanel,
+body[data-theme="dark"] .taxPanel {background:#222!important;color:#f4f4f4!important;border-color:#3d3d3d!important}
+body[data-theme="dark"] #targetBox>div,body[data-theme="dark"] #targetBox span,body[data-theme="dark"] .monthCompareMain,body[data-theme="dark"] .nextMini,body[data-theme="dark"] .nextMini>div:first-child,body[data-theme="dark"] .nextStats,body[data-theme="dark"] .extraDashSub,body[data-theme="dark"] .extraDashStat,body[data-theme="dark"] .compactMeta,body[data-theme="dark"] .compactNote{color:#b8b8b8!important}
+body[data-theme="dark"] .nextStats b,body[data-theme="dark"] .extraDashStat b,body[data-theme="dark"] .compactMeta b,body[data-theme="dark"] .extraDashTitle{color:#f4f4f4!important}
+body[data-theme="dark"] .extraDashStat b.eur{color:#ff4a50!important}
+body[data-theme="dark"] .extraDashIcon,body[data-theme="dark"] .compactIcon.red{background:#3a2022!important;color:#ff4a50!important}
+body[data-theme="dark"] .compactIcon.purple,body[data-theme="dark"] .compactIcon.violet{background:#302c48!important;color:#aaa1ff!important}
+body[data-theme="dark"] .compactIcon.blue{background:#203247!important;color:#7bb8ff!important}
+body[data-theme="dark"] .compactBadge{background:#302c48!important;color:#c6c0ff!important}
+body[data-theme="dark"] .compactBadge.redBadge{background:#3a2022!important;color:#ff7378!important}
+body[data-theme="dark"] .workspaceTabs,body[data-theme="dark"] .workspaceTab,body[data-theme="dark"] .settingsTabs,body[data-theme="dark"] .settingsTab{background:#1d1d1d!important;color:#e8e8e8!important;border-color:#444!important}
+body[data-theme="dark"] .workspaceTab.active{background:#d71920!important;color:#fff!important;border-color:#d71920!important}
+body[data-theme="dark"] .settingsTab.active{background:#090909!important;color:#fff!important}
+body[data-theme="dark"] .extraSummary .extraPill,body[data-theme="dark"] .extraTaxBottom,body[data-theme="dark"] .taxDelta{background:#2b2b2b!important;color:#eee!important;border-color:#444!important}
+body[data-theme="dark"] .extraTaxCard{background:#222!important;color:#f4f4f4!important;border-color:#555!important}
+body[data-theme="dark"] .extraTaxCard.accent{border-color:#ef233c!important}
+body[data-theme="dark"] .roomGrid button:not(.statusBtn),body[data-theme="dark"] .clientCardHead button,body[data-theme="dark"] .invoicePanel button:not(.primary),body[data-theme="dark"] .compactBody button:not(.primary){background:#2b2b2b!important;color:#f4f4f4!important;border-color:#4a4a4a!important}
+body[data-theme="dark"] .statusBtn{background:#3a3020!important;color:#ffd37a!important;border-color:#755d28!important}
+body[data-theme="dark"] .statusBtn.done{background:#173b2c!important;color:#9be7bd!important;border-color:#285d47!important}
+body[data-theme="dark"] .docPaper{background:#fff!important;color:#111!important}
+</style>
 </head>
 <body>
 <div id="loginScreen" class="loginScreen">
@@ -1347,10 +1383,10 @@ function renderDocPreview(){
   return;
  }
  if(type==="Act adițional"){
-  paper.innerHTML=`<h2>ACT ADIȚIONAL NR. ${no}</h2><div class="docSub">la Contractul de prestări servicii nr. ${contract}</div><p>Încheiat astăzi, <b>${date}</b>, între <b>${clientLegal}</b>, în calitate de Beneficiar, și <b>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</b>, în calitate de Prestator.</p><div class="docArt">Art. 1 – Modificarea contractului</div><p>Părțile convin modificarea/completarea condițiilor comerciale prevăzute de Contractul nr. ${contract}.</p><div class="docArt">Art. 2 – Remunerația</div><p>Pentru serviciile ce intră sub incidența prezentului act adițional, părțile stabilesc remunerația Prestatorului ca ${remunerationText}.</p><div class="docArt">Art. 3 – Facturarea</div><p>Serviciile vor fi facturate de Prestator conform regimului fiscal aplicabil acestuia și documentelor justificative convenite între părți.</p><div class="docArt">Art. 4 – Dispoziții finale</div><p>Celelalte clauze ale Contractului nr. ${contract} rămân neschimbate. Prezentul act adițional face parte integrantă din contract.</p>${docSignatures(clientLegal)}`;
+  paper.innerHTML=`<h2>ACT ADIȚIONAL NR. ${no}</h2><div class="docSub">la Contractul de prestări servicii nr. ${contract}</div><p>Încheiat astăzi, <b>${date}</b>, între:</p><p><b>${clientLegal}</b>, în calitate de Beneficiar,</p><p style="text-align:center;margin:8px 0"><b>și</b></p><p><b>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</b>, în calitate de Prestator.</p><div class="docArt">Art. 1 – Modificarea contractului</div><p>Părțile convin modificarea/completarea condițiilor comerciale prevăzute de Contractul nr. ${contract}.</p><div class="docArt">Art. 2 – Remunerația</div><p>Pentru serviciile ce intră sub incidența prezentului act adițional, părțile stabilesc remunerația Prestatorului ca ${remunerationText}.</p><div class="docArt">Art. 3 – Facturarea</div><p>Serviciile vor fi facturate de Prestator conform regimului fiscal aplicabil acestuia și documentelor justificative convenite între părți.</p><div class="docArt">Art. 4 – Dispoziții finale</div><p>Celelalte clauze ale Contractului nr. ${contract} rămân neschimbate. Prezentul act adițional face parte integrantă din contract.</p>${docSignatures(clientLegal)}`;
   return;
  }
- paper.innerHTML=`<h2>ANEXĂ NR. ${no}</h2><div class="docSub">la Contractul de prestări servicii nr. ${contract}</div><p>Încheiată astăzi, <b>${date}</b>, între <b>${clientLegal}</b>, în calitate de Beneficiar, și <b>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</b>, în calitate de Prestator.</p><div class="docArt">Art. 1 – Proiectul</div><p>Părțile convin ca serviciile de proiectare aferente proiectului <b>${project}</b> să fie prestate și remunerate în condițiile prevăzute în prezenta anexă.</p><div class="docArt">Art. 2 – Valoarea serviciilor</div><p>Pentru serviciile de proiectare aferente proiectului menționat la Art. 1, părțile stabilesc remunerația Prestatorului ca ${remunerationText}.</p><div class="docArt">Art. 3 – Facturarea</div><p>Serviciile vor fi facturate de Prestator conform regimului fiscal aplicabil acestuia.</p><div class="docArt">Art. 4 – Dispoziții finale</div><p>Celelalte prevederi ale Contractului nr. ${contract} rămân neschimbate. Prezenta anexă face parte integrantă din contract.</p>${docSignatures(clientLegal)}`;
+ paper.innerHTML=`<h2>ANEXĂ NR. ${no}</h2><div class="docSub">la Contractul de prestări servicii nr. ${contract}</div><p>Încheiată astăzi, <b>${date}</b>, între:</p><p><b>${clientLegal}</b>, în calitate de Beneficiar,</p><p style="text-align:center;margin:8px 0"><b>și</b></p><p><b>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</b>, în calitate de Prestator.</p><div class="docArt">Art. 1 – Proiectul</div><p>Părțile convin ca serviciile de proiectare aferente proiectului <b>${project}</b> să fie prestate și remunerate în condițiile prevăzute în prezenta anexă.</p><div class="docArt">Art. 2 – Valoarea serviciilor</div><p>Pentru serviciile de proiectare aferente proiectului menționat la Art. 1, părțile stabilesc remunerația Prestatorului ca ${remunerationText}.</p><div class="docArt">Art. 3 – Facturarea</div><p>Serviciile vor fi facturate de Prestator conform regimului fiscal aplicabil acestuia.</p><div class="docArt">Art. 4 – Dispoziții finale</div><p>Celelalte prevederi ale Contractului nr. ${contract} rămân neschimbate. Prezenta anexă face parte integrantă din contract.</p>${docSignatures(clientLegal)}`;
 }
 function docSignatures(clientLegal){return `<div class="docSignatures"><div><b>BENEFICIAR</b><br>${clientLegal}<br><br>Semnătură: __________</div><div><b>PRESTATOR</b><br>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ<br><br>Semnătură: __________</div></div>`;}
 function docTypeKey(t){return t==="Contract"?"contract":t==="Act adițional"?"act":"anexa"}
