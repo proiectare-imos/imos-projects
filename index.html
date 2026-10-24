@@ -600,6 +600,10 @@ body[data-theme="dark"] .compactState.pendingState{background:#3a3020;color:#f0c
 @media(max-width:760px){.compactFinalRow{grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;padding:7px 3px}.compactCollaborator{grid-column:1}.compactAmount{grid-column:2;grid-row:1}.compactReopen,.compactState{grid-column:2;grid-row:2;justify-self:end}.compactFinalCard .clientTitle strong{font-size:12px!important}}
 
 
+
+/* Gmail brand icon on invoice history action */
+.gmailLogoBtn{display:inline-flex!important;align-items:center;justify-content:center;min-width:38px;min-height:30px;padding:5px 8px!important}
+.gmailLogo{display:block;width:23px;height:18px}
 </style>
 <style>
 /* v16.3 FINAL - mutare COLABORATOR spre stanga */
@@ -996,7 +1000,7 @@ aside .createdBy{box-sizing:border-box;width:100%;padding-left:10px!important;pa
 </div></div></div>
 <div id="settings-general" class="settingsPane"><div class="wsCard"><div class="wsHead"><h3>Setări generale</h3><button class="primary" onclick="savePfaSettings()">Salvează</button></div><div class="settingsGrid"><label>Țintă lunară (lei)<input id="setTarget" type="number" min="0" step="1000"></label><label>Procent implicit Mobiliart (%)<input id="setRate" type="number" min="0" max="100" step="0.1"></label><label>Prag MEDIU (lei)<input id="setMedium" type="number" min="0" step="1000"></label><label>Prag BUN (lei)<input id="setGood" type="number" min="0" step="1000"></label><label>Prag FOARTE BUN (lei)<input id="setVeryGood" type="number" min="0" step="1000"></label><label>Luna la deschiderea aplicației<input value="Automat după data curentă" disabled></label></div><p class="wsMuted" style="margin-top:14px">Procentul implicit se aplică lucrărilor noi; lucrările existente își păstrează procentul salvat.</p></div></div>
 <div id="settings-backup" class="settingsPane"><div class="wsCard"><div class="wsHead"><div><h3>Backup date</h3><div class="wsMuted">Salvează local clienții, lucrările, facturile, taskurile și setările.</div></div></div><div class="backupActions"><button class="primary" onclick="downloadBackup()">↓ Descarcă backup</button><button class="add" onclick="document.getElementById('backupRestoreInput').click()">↥ Restaurează backup</button><input id="backupRestoreInput" type="file" accept="application/json,.json" style="display:none" onchange="restoreBackup(this.files[0]);this.value=''" /></div><div id="lastBackupText" class="backupLast">Ultimul backup pe acest dispozitiv: —</div><div class="wsMuted" style="margin-top:10px">Fișierele PDF/documentele din Storage rămân online în Supabase; backupul conține datele și legăturile lor, nu copii ale fișierelor.</div></div></div>
-<div id="settings-about" class="settingsPane"><div class="wsCard aboutCard"><div class="aboutLogo"><svg class="imosCubeLogo aboutCubeLogo" viewBox="0 0 64 64" aria-hidden="true"><polygon class="top" points="32,4 57,18 32,32 7,18"/><polygon class="left" points="7,18 32,32 32,60 7,46"/><polygon class="right" points="57,18 32,32 32,60 57,46"/><polygon class="cut" points="32,13 43,19 32,25 21,19"/><polygon class="cut" points="15,25 26,31 26,44 15,38"/><polygon class="cut" points="49,25 38,31 38,44 49,38"/></svg><div><div class="aboutTitle"><span>IMOS</span> Projects</div><div class="wsMuted">Centralizator proiecte & facturare</div></div></div><p>Centralizator pentru gestionarea lucrărilor de proiectare mobilier, urmărirea valorilor de proiect, calculul sumelor de facturat și organizarea documentelor de colaborare.</p><div class="aboutFlow">proiect <b>→</b> finalizare <b>→</b> centralizare <b>→</b> facturare</div><div class="aboutMeta"><span><small>VERSIUNE</small><b>16.33</b></span><span><small>DEZVOLTAT PENTRU</small><b>MICLERU GEORGE PFA</b></span></div><div class="aboutBadges"><span>IMOS iX</span><span>WoodWOP</span><span>B2B</span><span>PFA</span></div><div class="aboutSignature">Created by <strong>George MICLERU</strong></div></div></div>
+<div id="settings-about" class="settingsPane"><div class="wsCard aboutCard"><div class="aboutLogo"><svg class="imosCubeLogo aboutCubeLogo" viewBox="0 0 64 64" aria-hidden="true"><polygon class="top" points="32,4 57,18 32,32 7,18"/><polygon class="left" points="7,18 32,32 32,60 7,46"/><polygon class="right" points="57,18 32,32 32,60 57,46"/><polygon class="cut" points="32,13 43,19 32,25 21,19"/><polygon class="cut" points="15,25 26,31 26,44 15,38"/><polygon class="cut" points="49,25 38,31 38,44 49,38"/></svg><div><div class="aboutTitle"><span>IMOS</span> Projects</div><div class="wsMuted">Centralizator proiecte & facturare</div></div></div><p>Centralizator pentru gestionarea lucrărilor de proiectare mobilier, urmărirea valorilor de proiect, calculul sumelor de facturat și organizarea documentelor de colaborare.</p><div class="aboutFlow">proiect <b>→</b> finalizare <b>→</b> centralizare <b>→</b> facturare</div><div class="aboutMeta"><span><small>VERSIUNE</small><b>16.34</b></span><span><small>DEZVOLTAT PENTRU</small><b>MICLERU GEORGE PFA</b></span></div><div class="aboutBadges"><span>IMOS iX</span><span>WoodWOP</span><span>B2B</span><span>PFA</span></div><div class="aboutSignature">Created by <strong>George MICLERU</strong></div></div></div>
 </div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1481,7 +1485,62 @@ function renderInvoiceHistory(){
   const el=document.getElementById("invoiceHistoryList"); if(!el)return;
   if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; el.innerHTML='<div class="historyEmpty"><b>Eroare Supabase:</b> '+esc(e.message||'Eroare necunoscută')+(e.code?' <code>'+esc(e.code)+'</code>':'')+'</div>';return}
   if(!invoiceHistory.length){el.innerHTML='<div class="historyEmpty">Nu ai încă facturi înregistrate.</div>';return}
-  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${formatRoDate(x.invoice_date)}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="printInvoiceSnapshot(${i})">Vezi centralizator</button><button class="mini invoicePdfBtn" onclick="invoicePdfAction('${x.id}')">📎 PDF</button></div></div>`).join("");
+  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${formatRoDate(x.invoice_date)}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="printInvoiceSnapshot(${i})">Vezi centralizator</button><button class="mini invoicePdfBtn" onclick="invoicePdfAction('${x.id}')">📎 PDF</button><button class="mini gmailLogoBtn" title="Trimite factura prin Gmail" aria-label="Trimite factura prin Gmail" onclick="sendInvoiceGmail('${x.id}')"><svg class="gmailLogo" viewBox="0 0 48 36" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M5 34h7V17L5 11z"/><path fill="#34A853" d="M36 34h7V11l-7 6z"/><path fill="#EA4335" d="M5 11l19 15 19-15V5c0-3-3-5-6-3L24 13 11 2C8 0 5 2 5 5z"/><path fill="#C5221F" d="M5 11l7 6V5L5 0z"/><path fill="#FBBC04" d="M36 5v12l7-6V5z"/></svg></button></div></div>`).join("");
+}
+function closeInvoiceEmailPreview(){
+  const modal=document.getElementById("invoiceEmailPreview");
+  if(modal)modal.remove();
+}
+function sendInvoiceGmail(invoiceId){
+  const invoice=invoiceHistory.find(x=>x.id===invoiceId); if(!invoice)return;
+  const pdf=pfaFiles.find(x=>x.invoice_id===invoiceId);
+  if(!pdf){alert("Încarcă mai întâi PDF-ul facturii folosind butonul 📎 PDF.");return}
+  closeInvoiceEmailPreview();
+  const monthName=(names[(Number(invoice.month)||1)-1]||"").toString();
+  const invoiceNo=(invoice.invoice_number||"fără număr").toString();
+  const subject=`Micleru George – Factura nr. ${invoiceNo} – ${monthName} ${invoice.year||""}`.trim();
+  const modal=document.createElement("div");
+  modal.id="invoiceEmailPreview";
+  modal.style.cssText="position:fixed;inset:0;z-index:30000;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px";
+  modal.innerHTML=`<section role="dialog" aria-modal="true" aria-labelledby="invoiceEmailTitle" style="width:min(680px,100%);max-height:92vh;overflow:auto;background:var(--card,#fff);color:var(--ink,#111);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.3);padding:22px">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px"><h2 id="invoiceEmailTitle" style="margin:0;font-size:21px">Verifică e-mailul înainte de trimitere</h2><button type="button" id="invoiceEmailX" aria-label="Închide" style="border:0;background:transparent;font-size:25px;cursor:pointer;color:inherit">×</button></div>
+    <p style="font-size:13px;color:var(--muted,#666);margin:0 0 16px">E-mailul NU se trimite când deschizi această fereastră. Se trimite numai după ce apeși „Trimite acum”.</p>
+    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailTo">Către</label><input id="invoiceEmailTo" type="email" value="contabilitate@mobiliart.ro" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
+    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailSubject">Subiect</label><input id="invoiceEmailSubject" type="text" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
+    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailBody">Mesaj</label><textarea id="invoiceEmailBody" rows="5" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit;line-height:1.5">Bună ziua,
+
+Vă transmit atașată factura aferentă serviciilor de proiectare mobilier.
+
+Mulțumesc!</textarea>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:12px;margin-top:14px"><span style="font-size:23px">📎</span><div style="flex:1;min-width:180px"><b>PDF-ul facturii va fi atașat</b><div id="invoiceEmailFileName" style="font-size:12px;color:var(--muted,#666);margin-top:3px;overflow-wrap:anywhere"></div></div><button type="button" id="invoiceEmailOpenPdf" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer">Deschide PDF</button></div>
+    <div style="display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:20px"><button type="button" id="invoiceEmailCancel" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer">Anulează</button><button type="button" id="invoiceEmailSend" style="border:0;background:#d71920;color:#fff;border-radius:9px;padding:11px 16px;font-weight:900;cursor:pointer">Trimite acum</button></div>
+  </section>`;
+  document.body.appendChild(modal);
+  const byId=id=>modal.querySelector("#"+id);
+  byId("invoiceEmailSubject").value=subject;
+  byId("invoiceEmailFileName").textContent=pdf.file_name||pdf.label||"Factura PDF";
+  byId("invoiceEmailX").onclick=closeInvoiceEmailPreview;
+  byId("invoiceEmailCancel").onclick=closeInvoiceEmailPreview;
+  modal.addEventListener("click",e=>{if(e.target===modal)closeInvoiceEmailPreview()});
+  byId("invoiceEmailOpenPdf").onclick=()=>openPfaFile(pdf.id);
+  byId("invoiceEmailSend").onclick=async()=>{
+    const recipient=byId("invoiceEmailTo").value.trim();
+    const emailSubject=byId("invoiceEmailSubject").value.trim();
+    const message=byId("invoiceEmailBody").value.trim();
+    if(!recipient||!emailSubject||!message){alert("Completează destinatarul, subiectul și mesajul.");return}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)){alert("Adresa de e-mail nu pare validă.");return}
+    if(!confirm(`Confirmi trimiterea facturii ${invoiceNo} către ${recipient}?`))return;
+    const sendButton=byId("invoiceEmailSend");
+    sendButton.disabled=true;sendButton.textContent="Se trimite…";
+    setLoading(true);
+    try{
+      const {data,error}=await sb.functions.invoke("gmail-send",{body:{invoice_id:invoiceId,recipient,subject:emailSubject,message}});
+      if(error){let msg=error.message||"Eroare la trimitere.";try{const body=await error.context?.json?.();if(body?.error)msg=body.error}catch{}alert(msg);return}
+      if(data?.success){closeInvoiceEmailPreview();alert(data.message||"Factura a fost trimisă.");}
+      else alert(data?.error||"Nu s-a putut confirma trimiterea.");
+    }catch(e){alert(e?.message||"Eroare la trimiterea facturii.")}
+    finally{setLoading(false);if(sendButton.isConnected){sendButton.disabled=false;sendButton.textContent="Trimite acum"}}
+  };
 }
 function printInvoiceSnapshot(i){
   const x=invoiceHistory[i]; if(!x)return; const snap=Array.isArray(x.snapshot)?x.snapshot:[];
