@@ -709,7 +709,7 @@ body[data-theme="light"] .sideNavGroup{color:#444}body[data-theme="light"] .side
 @media(min-width:1051px){.projectsHead,.roomGrid{grid-template-columns:minmax(175px,1.75fr) minmax(95px,1fr) minmax(130px,1.25fr) minmax(105px,.9fr) minmax(110px,.95fr) minmax(125px,1.15fr) minmax(105px,1fr) minmax(78px,.7fr) 32px!important}.projectsHead{padding-left:38px!important}.roomGrid{padding-left:38px!important}.statusCell{min-width:0}}
 
 /* v16.11 - istoric facturi */
-.invoiceHistoryList{padding:10px 18px 18px}.historyRow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #ececef}.historyRow:last-child{border-bottom:0}.historyMain{font-weight:900}.historyMeta{font-size:11px;color:#777;margin-top:3px}.historyAmount{font-weight:900;color:#15966a;text-align:right;white-space:nowrap}.historyEmpty{padding:12px 0;color:#777;font-size:13px}@media(max-width:800px){.historyRow{grid-template-columns:1fr auto}.historyRow>div:nth-child(2),.historyRow>div:nth-child(3){grid-column:1}.historyRow .historyAmount{grid-column:2;grid-row:1}.historyRow>div:last-child{grid-column:1/-1}.historyRow button{width:100%}}
+.invoiceHistoryList{padding:10px 18px 18px}.historyRow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #ececef}.historyRow:last-child{border-bottom:0}.historyMain{font-weight:900}.historyMeta{font-size:11px;color:#777;margin-top:3px}.historyAmount{font-weight:900;color:#15966a;text-align:right;white-space:nowrap}.historyEmpty{padding:12px 0;color:#777;font-size:13px}@media(max-width:800px){.historyRow{grid-template-columns:1fr auto}.historyRow>div:nth-child(2),.historyRow>div:nth-child(3){grid-column:1}.historyRow .historyAmount{grid-column:2;grid-row:1}.historyRow>div:last-child{grid-column:1/-1}.historyRow button{width:100%}}.historyActions{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}.historyActions .mini{white-space:nowrap}.historyActions .danger{border-color:#7f1d1d;color:#ff7b84}@media(max-width:800px){.historyActions{justify-content:flex-start}.historyActions .mini{width:auto}}
 </style>
 
 <style>
@@ -1643,7 +1643,31 @@ function renderInvoiceHistory(){
   const el=document.getElementById("invoiceHistoryList"); if(!el)return;
   if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; el.innerHTML='<div class="historyEmpty"><b>Eroare Supabase:</b> '+esc(e.message||'Eroare necunoscută')+(e.code?' <code>'+esc(e.code)+'</code>':'')+'</div>';return}
   if(!invoiceHistory.length){el.innerHTML='<div class="historyEmpty">Nu ai încă facturi înregistrate.</div>';return}
-  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${formatRoDate(x.invoice_date)}</div><div class="historyAmount">${fmt(x.amount)}</div><div><button class="mini" onclick="downloadInvoiceSnapshot(${i})">⬇ Descarcă PDF</button><button class="mini invoicePdfBtn" onclick="invoicePdfAction('${x.id}')">📎 PDF</button><button class="mini gmailLogoBtn" title="Trimite factura prin Gmail" aria-label="Trimite factura prin Gmail" onclick="sendInvoiceGmail('${x.id}')"><svg class="gmailLogo" viewBox="0 0 48 36" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M5 34h7V17L5 11z"/><path fill="#34A853" d="M36 34h7V11l-7 6z"/><path fill="#EA4335" d="M5 11l19 15 19-15V5c0-3-3-5-6-3L24 13 11 2C8 0 5 2 5 5z"/><path fill="#C5221F" d="M5 11l7 6V5L5 0z"/><path fill="#FBBC04" d="M36 5v12l7-6V5z"/></svg></button></div></div>`).join("");
+  el.innerHTML=invoiceHistory.map((x,i)=>`<div class="historyRow"><div><div class="historyMain">${esc(names[(Number(x.month)||1)-1])} ${x.year}</div><div class="historyMeta">${esc(x.collaborator||"—")} · ${x.work_count||0} lucrări</div></div><div><b>${esc(x.invoice_number||"—")}</b></div><div>${formatRoDate(x.invoice_date)}</div><div class="historyAmount">${fmt(x.amount)}</div><div class="historyActions"><button class="mini" onclick="downloadInvoiceSnapshot(${i})">⬇ Descarcă PDF</button><button class="mini invoicePdfBtn" onclick="invoicePdfAction('${x.id}')">📎 PDF</button><button class="mini gmailLogoBtn" title="Trimite factura prin Gmail" aria-label="Trimite factura prin Gmail" onclick="sendInvoiceGmail('${x.id}')"><svg class="gmailLogo" viewBox="0 0 48 36" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M5 34h7V17L5 11z"/><path fill="#34A853" d="M36 34h7V11l-7 6z"/><path fill="#EA4335" d="M5 11l19 15 19-15V5c0-3-3-5-6-3L24 13 11 2C8 0 5 2 5 5z"/><path fill="#C5221F" d="M5 11l7 6V5L5 0z"/><path fill="#FBBC04" d="M36 5v12l7-6V5z"/></svg></button><button class="mini" onclick="editInvoice('${x.id}')">✏️ Editează</button><button class="mini danger" onclick="deleteInvoice('${x.id}')">🗑️ Șterge</button></div></div>`).join("");
+}
+async function editInvoice(invoiceId){
+  const x=invoiceHistory.find(v=>String(v.id)===String(invoiceId));if(!x)return;
+  const number=prompt("Numărul facturii:",x.invoice_number||"");if(number===null)return;if(!number.trim()){alert("Numărul facturii nu poate fi gol.");return}
+  const date=prompt("Data facturii (AAAA-LL-ZZ):",String(x.invoice_date||"").slice(0,10));if(date===null)return;if(!/^\d{4}-\d{2}-\d{2}$/.test(date.trim())||Number.isNaN(Date.parse(date.trim()))){alert("Data nu este validă. Folosește formatul AAAA-LL-ZZ.");return}
+  const collaborator=prompt("Client / colaborator:",x.collaborator||"");if(collaborator===null)return;if(!collaborator.trim()){alert("Clientul / colaboratorul nu poate fi gol.");return}
+  const amountText=prompt("Suma facturii în lei:",String(Number(x.amount)||0).replace(".",","));if(amountText===null)return;const amount=Number(amountText.trim().replace(/\s/g,"").replace(/\./g,"").replace(",","."));if(!Number.isFinite(amount)||amount<0){alert("Suma introdusă nu este validă.");return}
+  const payload={invoice_number:number.trim(),invoice_date:date.trim(),collaborator:collaborator.trim(),amount};
+  if(!confirm(`Salvezi modificările facturii ${x.invoice_number||"—"}?`))return;
+  setLoading(true);const {error}=await sb.from("invoices").update(payload).eq("id",invoiceId).eq("user_id",user.id);setLoading(false);
+  if(error){alert("Nu am putut modifica factura: "+error.message);return}
+  await refreshAll();renderInvoiceHistory();updateCompactSummary();renderExtraDashboard();alert("Factura a fost actualizată. Modificarea se aplică doar în IMOS Projects, nu în Solo.");
+}
+async function deleteInvoice(invoiceId){
+  const x=invoiceHistory.find(v=>String(v.id)===String(invoiceId));if(!x)return;
+  if(!confirm(`Ștergi din IMOS Projects factura ${x.invoice_number||"—"} (${fmt(x.amount)})?\n\nFactura reală din Solo NU va fi ștearsă. Fișierele PDF și istoricul e-mailurilor asociate vor fi păstrate, dar desprinse de această înregistrare.`))return;
+  setLoading(true);
+  const {error:fe}=await sb.from("pfa_files").update({invoice_id:null}).eq("invoice_id",invoiceId).eq("user_id",user.id);
+  if(fe){setLoading(false);alert("Nu am putut pregăti ștergerea fișierelor asociate: "+fe.message);return}
+  const {error:ee}=await sb.from("email_send_history").update({invoice_id:null}).eq("invoice_id",invoiceId).eq("user_id",user.id);
+  if(ee){setLoading(false);alert("Nu am putut desprinde istoricul e-mailurilor: "+ee.message);return}
+  const {error}=await sb.from("invoices").delete().eq("id",invoiceId).eq("user_id",user.id);setLoading(false);
+  if(error){alert("Nu am putut șterge înregistrarea: "+error.message);return}
+  await refreshAll();renderInvoiceHistory();renderEmailHistory();updateCompactSummary();renderExtraDashboard();alert("Înregistrarea facturii a fost ștearsă din IMOS Projects. Factura din Solo nu a fost afectată.");
 }
 function renderEmailHistory(){
   const list=document.getElementById("emailHistoryList"), badge=document.getElementById("emailHistoryCount");
@@ -2215,7 +2239,7 @@ function applyTheme(theme){
 }
 function initTheme(){applyTheme(localStorage.getItem('imos_theme')||'red')}
 function updateLastBackupText(){const el=document.getElementById('lastBackupText');if(!el)return;const raw=localStorage.getItem('imos_last_backup');el.textContent='Ultimul backup pe acest dispozitiv: '+(raw?new Date(raw).toLocaleString('ro-RO'):'—')}
-function backupPayload(){return {app:'IMOS Projects',version:'16.50',created_at:new Date().toISOString(),year:YEAR,clients:Object.values(clientsById),rooms:allRooms,invoices:invoiceHistory,tasks:pfaTasks,settings:pfaSettings,generated_documents:generatedDocs,extra_projects:extraProjects,files:pfaFiles.map(f=>({id:f.id,category:f.category,label:f.label,file_name:f.file_name,storage_path:f.storage_path,invoice_id:f.invoice_id,created_at:f.created_at}))}}
+function backupPayload(){return {app:'IMOS Projects',version:'16.52',created_at:new Date().toISOString(),year:YEAR,clients:Object.values(clientsById),rooms:allRooms,invoices:invoiceHistory,tasks:pfaTasks,settings:pfaSettings,generated_documents:generatedDocs,extra_projects:extraProjects,files:pfaFiles.map(f=>({id:f.id,category:f.category,label:f.label,file_name:f.file_name,storage_path:f.storage_path,invoice_id:f.invoice_id,created_at:f.created_at}))}}
 function downloadBackup(){const payload=backupPayload();const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`IMOS_Projects_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);localStorage.setItem('imos_last_backup',new Date().toISOString());updateLastBackupText()}
 async function restoreBackup(file){
  if(!file)return; let b;try{b=JSON.parse(await file.text())}catch(e){alert('Fișierul de backup nu este valid.');return}
