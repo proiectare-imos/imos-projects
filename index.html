@@ -1659,15 +1659,17 @@ async function editInvoice(invoiceId){
 }
 async function deleteInvoice(invoiceId){
   const x=invoiceHistory.find(v=>String(v.id)===String(invoiceId));if(!x)return;
-  if(!confirm(`Ștergi din IMOS Projects factura ${x.invoice_number||"—"} (${fmt(x.amount)})?\n\nFactura reală din Solo NU va fi ștearsă. Fișierele PDF și istoricul e-mailurilor asociate vor fi păstrate, dar desprinse de această înregistrare.`))return;
+  if(!confirm(`Ștergi din IMOS Projects factura ${x.invoice_number||"—"} (${fmt(x.amount)})?\n\nFactura reală din Solo NU va fi ștearsă. Fișierele PDF și istoricul e-mailurilor nu vor fi șterse.`))return;
   setLoading(true);
+  // Desprindem fișierele PDF, dacă politica Supabase permite. Dacă nu, oprim pentru a nu lăsa o asociere incertă.
   const {error:fe}=await sb.from("pfa_files").update({invoice_id:null}).eq("invoice_id",invoiceId).eq("user_id",user.id);
-  if(fe){setLoading(false);alert("Nu am putut pregăti ștergerea fișierelor asociate: "+fe.message);return}
+  if(fe){setLoading(false);alert("Nu am putut desprinde fișierele PDF asociate, deci nu am șters factura. Detalii: "+fe.message);return}
+  // Istoricul e-mailurilor este doar auxiliar. O eroare RLS la desprinderea lui nu trebuie să blocheze încercarea de ștergere a facturii.
   const {error:ee}=await sb.from("email_send_history").update({invoice_id:null}).eq("invoice_id",invoiceId).eq("user_id",user.id);
-  if(ee){setLoading(false);alert("Nu am putut desprinde istoricul e-mailurilor: "+ee.message);return}
   const {error}=await sb.from("invoices").delete().eq("id",invoiceId).eq("user_id",user.id);setLoading(false);
-  if(error){alert("Nu am putut șterge înregistrarea: "+error.message);return}
-  await refreshAll();renderInvoiceHistory();renderEmailHistory();updateCompactSummary();renderExtraDashboard();alert("Înregistrarea facturii a fost ștearsă din IMOS Projects. Factura din Solo nu a fost afectată.");
+  if(error){alert("Supabase nu a permis ștergerea facturii: "+error.message+ (ee?"\n\nNu s-a putut modifica nici asocierea istoricului de e-mailuri (permisiuni). Pentru a finaliza ștergerea poate fi necesară o regulă ON DELETE SET NULL sau o politică RLS în Supabase.":""));return}
+  await refreshAll();renderInvoiceHistory();renderEmailHistory();updateCompactSummary();renderExtraDashboard();
+  alert("Înregistrarea facturii a fost ștearsă din IMOS Projects. Factura din Solo nu a fost afectată."+(ee?"\n\nAtenție: istoricul e-mailurilor nu a putut fi desprins din cauza permisiunilor; verifică-l în secțiunea Istoric e-mailuri.":""));
 }
 function renderEmailHistory(){
   const list=document.getElementById("emailHistoryList"), badge=document.getElementById("emailHistoryCount");
