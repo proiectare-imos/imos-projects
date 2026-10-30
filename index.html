@@ -1519,7 +1519,12 @@ async function togglePending(i){
   }
 }
 let roomView="pending";
-function setRoomView(view){roomView=view;render()}
+function setRoomView(view){
+  roomView=view;
+  render();
+  // Deschide automat cardul „Lucrările lunii” când alegem o categorie.
+  setWorksBodyOpen(true);
+}
 function finalizedRows(){return data.filter(r=>!r.pending)}
 function render(){
   syncMobileMonthPicker();
@@ -1955,7 +1960,18 @@ async function togglePfaTask(id,done){const {error}=await sb.from("pfa_tasks").u
 async function deletePfaTask(id){if(!confirm("Ștergi această notiță?"))return;const {error}=await sb.from("pfa_tasks").delete().eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
 
 function toggleCompact(id,btn){const el=document.getElementById(id);if(!el)return;el.classList.toggle("collapsed");if(btn)btn.classList.toggle("open",!el.classList.contains("collapsed"));}
-function toggleWorksBody(){const body=document.getElementById("worksBody"),btn=document.getElementById("worksToggleBtn"),chev=document.getElementById("worksToggleChevron");if(!body)return;const open=body.classList.contains("collapsed");body.classList.toggle("collapsed",!open);if(btn)btn.setAttribute("aria-expanded",String(open));if(chev){chev.classList.toggle("open",open);chev.textContent=open?"⌃":"⌄";}}
+function setWorksBodyOpen(open){
+  const body=document.getElementById("worksBody"),btn=document.getElementById("worksToggleBtn"),chev=document.getElementById("worksToggleChevron");
+  if(!body)return;
+  body.classList.toggle("collapsed",!open);
+  if(btn)btn.setAttribute("aria-expanded",String(open));
+  if(chev){chev.classList.toggle("open",open);chev.textContent=open?"⌃":"⌄";}
+}
+function toggleWorksBody(){
+  const body=document.getElementById("worksBody");
+  if(!body)return;
+  setWorksBodyOpen(body.classList.contains("collapsed"));
+}
 function toggleTargetLegend(){const legend=document.getElementById("targetLegend");if(!legend)return;legend.hidden=!legend.hidden;if(!legend.hidden)legend.scrollIntoView({behavior:"smooth",block:"nearest"});}
 function updateCompactSummary(){
  const pending=allRooms.filter(r=>String(r.notes||"").startsWith("[[IN_PROGRESS]]"));
