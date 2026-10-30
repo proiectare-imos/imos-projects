@@ -2004,7 +2004,7 @@ function renderExtraDashboard(){
 function soloInvoiceDescription(){return `Servicii de proiectare mobilier aferente lunii ${names[month].toLowerCase()} ${YEAR}, conform contractului și actului adițional`;}
 function soloInvoiceAmount(){return finalizedRows().reduce((sum,r)=>sum+rowBill(r),0);}
 async function copySoloInvoiceField(field){
-  const value=field==='article'?soloInvoiceDescription():soloInvoiceAmount().toFixed(2).replace('.',',');
+  const value=field==='article'?soloInvoiceDescription():soloInvoiceAmount().toFixed(2);
   const label=field==='article'?'Articolul':'Suma';
   try{
     await navigator.clipboard.writeText(value);
