@@ -1519,12 +1519,7 @@ async function togglePending(i){
   }
 }
 let roomView="pending";
-function setRoomView(view){
-  roomView=view;
-  render();
-  // Deschide automat cardul „Lucrările lunii” când alegem o categorie.
-  setWorksBodyOpen(true);
-}
+function setRoomView(view){roomView=view;render()}
 function finalizedRows(){return data.filter(r=>!r.pending)}
 function render(){
   syncMobileMonthPicker();
@@ -1630,19 +1625,28 @@ function renderInvoices(){
   </div>`).join("");
 }
 async function registerInvoice(collaborator){
-  if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; alert("Eroare Supabase la istoricul facturilor:\n\n"+(e.message||"Eroare necunoscută")+(e.code?"\nCod: "+e.code:"")+(e.details?"\nDetalii: "+e.details:"")+(e.hint?"\nHint: "+e.hint:""));return}
+  if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; alert("Eroare Supabase la istoricul facturilor:\\n\\n"+(e.message||"Eroare necunoscută")+(e.code?"\\nCod: "+e.code:"")+(e.details?"\\nDetalii: "+e.details:"")+(e.hint?"\\nHint: "+e.hint:""));return}
   const rows=finalizedRows().filter(r=>(r.collaborator||"").trim()===collaborator);
   if(!rows.length)return;
   const total=rows.reduce((a,r)=>a+rowBill(r),0);
-  const nr=prompt("Numărul facturii din SOLO (ex. 001/2026):",""); if(nr===null||!nr.trim())return;
-  const today=new Date().toISOString().slice(0,10);
-  const dt=prompt("Data facturii (AAAA-LL-ZZ):",today); if(dt===null||!dt.trim())return;
+
+  // Numărul Solo se generează din luna și anul selectate: GM-10-26/SOLO.
+  const invoiceNumber=`GM-${String(month+1).padStart(2,"0")}-${String(YEAR).slice(-2)}/SOLO`;
+  // Data se completează automat cu data locală a emiterii.
+  const now=new Date();
+  const invoiceDate=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+
+  const existing=invoiceHistory.find(x=>Number(x.year)===Number(YEAR)&&Number(x.month)===month+1&&String(x.collaborator||"").trim()===collaborator);
+  if(existing){
+    alert(`Există deja o factură înregistrată pentru ${names[month]} ${YEAR} (${existing.invoice_number||"fără număr"}). Nu am creat o dublură. O poți verifica sau corecta din Istoric facturi.`);
+    return;
+  }
   const article=`Servicii de proiectare mobilier aferente lunii ${names[month].toLowerCase()} ${YEAR}, conform contractului și actului adițional`;
   const snapshot=rows.map(r=>({client:r.client,room:r.room,value:Number(r.value)||0,bill:rowBill(r),note:r.note||"",payment_type:r.payment_type,commission_rate:r.commission_rate,fixed_fee:r.fixed_fee}));
-  if(!confirm(`Înregistrezi factura ${nr.trim()} · ${collaborator} · ${fmt(total)}?`))return;
-  const {error}=await sb.from("invoices").insert({user_id:user.id,year:YEAR,month:month+1,collaborator,invoice_number:nr.trim(),invoice_date:dt.trim(),amount:total,work_count:rows.length,article,snapshot});
+  if(!confirm(`Înregistrezi factura ${invoiceNumber} · ${collaborator} · ${fmt(total)} · ${formatRoDate(invoiceDate)}?`))return;
+  const {error}=await sb.from("invoices").insert({user_id:user.id,year:YEAR,month:month+1,collaborator,invoice_number:invoiceNumber,invoice_date:invoiceDate,amount:total,work_count:rows.length,article,snapshot});
   if(error){alert("Nu am putut salva factura: "+error.message);return}
-  await refreshAll(); alert("Factura a fost înregistrată în istoric.");
+  await refreshAll();renderInvoiceHistory();renderWorkspace();alert(`Factura ${invoiceNumber} a fost înregistrată în istoric. Numărul și data au fost completate automat.`);
 }
 function renderInvoiceHistory(){
   const el=document.getElementById("invoiceHistoryList"); if(!el)return;
@@ -1960,18 +1964,7 @@ async function togglePfaTask(id,done){const {error}=await sb.from("pfa_tasks").u
 async function deletePfaTask(id){if(!confirm("Ștergi această notiță?"))return;const {error}=await sb.from("pfa_tasks").delete().eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
 
 function toggleCompact(id,btn){const el=document.getElementById(id);if(!el)return;el.classList.toggle("collapsed");if(btn)btn.classList.toggle("open",!el.classList.contains("collapsed"));}
-function setWorksBodyOpen(open){
-  const body=document.getElementById("worksBody"),btn=document.getElementById("worksToggleBtn"),chev=document.getElementById("worksToggleChevron");
-  if(!body)return;
-  body.classList.toggle("collapsed",!open);
-  if(btn)btn.setAttribute("aria-expanded",String(open));
-  if(chev){chev.classList.toggle("open",open);chev.textContent=open?"⌃":"⌄";}
-}
-function toggleWorksBody(){
-  const body=document.getElementById("worksBody");
-  if(!body)return;
-  setWorksBodyOpen(body.classList.contains("collapsed"));
-}
+function toggleWorksBody(){const body=document.getElementById("worksBody"),btn=document.getElementById("worksToggleBtn"),chev=document.getElementById("worksToggleChevron");if(!body)return;const open=body.classList.contains("collapsed");body.classList.toggle("collapsed",!open);if(btn)btn.setAttribute("aria-expanded",String(open));if(chev){chev.classList.toggle("open",open);chev.textContent=open?"⌃":"⌄";}}
 function toggleTargetLegend(){const legend=document.getElementById("targetLegend");if(!legend)return;legend.hidden=!legend.hidden;if(!legend.hidden)legend.scrollIntoView({behavior:"smooth",block:"nearest"});}
 function updateCompactSummary(){
  const pending=allRooms.filter(r=>String(r.notes||"").startsWith("[[IN_PROGRESS]]"));
@@ -2004,7 +1997,7 @@ function renderExtraDashboard(){
 function soloInvoiceDescription(){return `Servicii de proiectare mobilier aferente lunii ${names[month].toLowerCase()} ${YEAR}, conform contractului și actului adițional`;}
 function soloInvoiceAmount(){return finalizedRows().reduce((sum,r)=>sum+rowBill(r),0);}
 async function copySoloInvoiceField(field){
-  const value=field==='article'?soloInvoiceDescription():soloInvoiceAmount().toFixed(2);
+  const value=field==='article'?soloInvoiceDescription():soloInvoiceAmount().toFixed(2).replace('.',',');
   const label=field==='article'?'Articolul':'Suma';
   try{
     await navigator.clipboard.writeText(value);
