@@ -1744,20 +1744,81 @@ Mulțumesc!</textarea>
   };
 }
 async function downloadInvoiceSnapshot(i){
-  const x=invoiceHistory[i]; if(!x)return;
-  if(typeof html2pdf === "undefined"){alert("Nu s-a putut încărca modulul PDF. Verifică conexiunea la internet și încearcă din nou.");return}
-  const snap=Array.isArray(x.snapshot)?x.snapshot:[];
-  const root=document.createElement("div");
-  root.style.cssText="width:1000px;padding:28px;background:#fff;color:#111;font-family:Arial,sans-serif;box-sizing:border-box";
-  const rows=snap.map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td style="text-align:right;white-space:nowrap">${fmt(r.value)}</td><td style="text-align:right;white-space:nowrap">${fmt(r.bill)}</td><td>${esc(r.note||"—")}</td></tr>`).join("");
-  root.innerHTML=`<div style="font-size:12px;font-weight:800">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div><h1 style="color:#d71920;font-size:24px;margin:18px 0 8px">CENTRALIZATOR SERVICII PROIECTARE</h1><p style="font-size:12px;margin-bottom:18px">${esc(names[(Number(x.month)||1)-1])} ${esc(x.year)} · ${esc(collabDisplayName(x.collaborator||""))} · Factura ${esc(x.invoice_number||"")} · ${esc(formatRoDate(x.invoice_date))}</p><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#171717;color:#fff"><th style="padding:9px;text-align:left">Client</th><th style="padding:9px;text-align:left">Încăpere</th><th style="padding:9px;text-align:right">Valoare lucrare</th><th style="padding:9px;text-align:right">De facturat</th><th style="padding:9px;text-align:left">Observații</th></tr></thead><tbody>${rows}</tbody></table><div style="text-align:right;font-size:16px;font-weight:bold;margin-top:20px">Total: <span style="color:#d71920">${fmt(x.amount)}</span></div><div style="margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;line-height:1.45;color:#666">Centralizator întocmit pe baza situației centralizate a proiectelor pusă la dispoziție de Client, conform Contractului de prestări servicii și Actului adițional nr. 1. Sunt incluse exclusiv lucrările pentru care serviciile de proiectare au fost efectuate de Prestator.</div>`;
-  document.body.appendChild(root);
-  try{
-    await html2pdf().set({margin:8,filename:`Centralizator_${String(x.year||YEAR)}-${String(x.month||month+1).padStart(2,"0")}_${String(x.invoice_number||"factura").replace(/[^a-z0-9_-]/gi,"_")}.pdf`,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"},pagebreak:{mode:["css","legacy"]}}).from(root).save();
-  }catch(e){alert("Nu am putut genera PDF-ul: "+(e?.message||e))}
-  finally{root.remove()}
-}
+  const x=invoiceHistory[i];
+  if(!x){alert("Nu am găsit factura selectată în istoric.");return}
 
+  let snap=x.snapshot;
+  if(typeof snap==="string"){
+    try{snap=JSON.parse(snap)}catch(e){snap=[]}
+  }
+  if(!Array.isArray(snap))snap=[];
+  if(!snap.length){
+    alert("Factura nu conține instantaneul lucrărilor. Nu generez un PDF gol. Verifică factura din istoric.");
+    return;
+  }
+
+  const rows=snap.map(r=>{
+    const value=Number(r.value)||0;
+    const bill=Number(r.bill ?? r.amount ?? 0)||0;
+    return `<tr>
+      <td>${esc(r.client||"—")}</td>
+      <td>${esc(r.room||"—")}</td>
+      <td class="num">${fmt(value)}</td>
+      <td class="num">${fmt(bill)}</td>
+      <td>${esc(r.note||"—")}</td>
+    </tr>`;
+  }).join("");
+
+  const invoiceMonth=Number(x.month)||month+1;
+  const monthName=names[invoiceMonth-1]||names[month];
+  const invoiceNumber=String(x.invoice_number||"factura");
+  const safeNumber=invoiceNumber.replace(/[^a-z0-9_-]/gi,"_");
+  const title=`Centralizator_${String(x.year||YEAR)}-${String(invoiceMonth).padStart(2,"0")}_${safeNumber}`;
+
+  const w=window.open("","_blank","width=1100,height=850");
+  if(!w){
+    alert("Browserul a blocat fereastra de print. Permite pop-up pentru acest site și încearcă din nou.");
+    return;
+  }
+
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8">
+    <title>${esc(title)}</title>
+    <style>
+      @page{size:A4 landscape;margin:16mm}
+      *{box-sizing:border-box}
+      html,body{margin:0;padding:0;background:#fff;color:#111}
+      body{font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.4}
+      .page{width:100%;max-width:265mm;margin:0 auto}
+      .provider{font-size:12px;font-weight:800;letter-spacing:.3px;margin-bottom:6px}
+      h1{color:#d71920;font-size:24px;line-height:1.15;margin:18px 0 26px}
+      .sub{color:#666;font-size:13px;margin-bottom:26px}
+      table{width:100%;border-collapse:collapse;table-layout:fixed}
+      th{color:#888;font-weight:600;text-align:center;border-bottom:1px solid #ccc}
+      th,td{padding:8px 6px;border-bottom:1px solid #d7d7d7;vertical-align:top;font-size:10px}
+      th:nth-child(1){width:19%}th:nth-child(2){width:17%}
+      th:nth-child(3){width:17%}th:nth-child(4){width:17%}th:nth-child(5){width:30%}
+      .num{text-align:right;white-space:nowrap}
+      .footer{text-align:right;font-size:18px;font-weight:bold;margin-top:20px}
+      .red{color:#d71920}
+      .legal{margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;line-height:1.45;color:#666}
+      @media print{.page{max-width:none}}
+    </style></head><body><main class="page">
+      <div class="provider">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div>
+      <h1>CENTRALIZATOR SERVICII PROIECTARE</h1>
+      <div class="sub">${esc(monthName)} ${esc(x.year)}<br>
+        Colaborator: ${esc(String(x.collaborator||"").trim().toUpperCase()==="VDM"?"VDM MOBILIART SRL":collabDisplayName(x.collaborator||"—"))}<br>
+        Factura: ${esc(invoiceNumber)} · Data: ${esc(formatRoDate(x.invoice_date))}
+      </div>
+      <table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <div class="footer">Total de facturat: <span class="red">${fmt(x.amount)}</span></div>
+      <div class="legal">Centralizator întocmit pe baza situației centralizate a proiectelor pusă la dispoziție de Client, conform Contractului de prestări servicii și Actului adițional nr. 1. Sunt incluse exclusiv lucrările pentru care serviciile de proiectare au fost efectuate de Prestator.</div>
+    </main><script>
+      window.onload=function(){setTimeout(function(){window.focus();window.print()},300)};
+    <\/script></body></html>`);
+  w.document.close();
+}
 function formatRoDate(v){if(!v)return "—";const p=String(v).slice(0,10).split("-");return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:esc(v)}
 
 function toggleDocGenerator(show){const el=document.getElementById("docGenerator");if(!el)return;el.style.display=show?"block":"none";if(show){const d=document.getElementById("docGenDate");if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);const sel=document.getElementById("docGenCollab");if(sel){const vals=getCollaboratorChoices();sel.innerHTML=vals.map(v=>`<option value="${esc(v)}">${esc(collabDisplayName(v))}</option>`).join("");}updateDocGeneratorFields();ensureContractClauses();setNextDocNumber();renderDocPreview();}}
@@ -2240,28 +2301,56 @@ function exportCSV(){
   let csv="\\ufeff"+rows.map(r=>r.map(csvSafe).join(";")).join("\\r\\n"),url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
   let a=document.createElement("a");a.href=url;a.download=`IMOS_${names[month]}_${YEAR}.csv`;a.click();URL.revokeObjectURL(url);
 }
-async function exportPDF(){
-  const button=[...document.querySelectorAll('button')].find(b=>b.getAttribute('onclick')==='exportPDF()');
-  if(typeof html2pdf === "undefined"){alert("Modulul PDF nu s-a încărcat. Verifică internetul și încearcă din nou.");return}
-  const total=finalizedRows().reduce((a,r)=>a+(Number(r.value)||0),0);
-  const billv=finalizedRows().reduce((a,r)=>a+rowBill(r),0);
-  const rows=finalizedRows().map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td class="num">${r.value?fmt(r.value):"—"}</td><td class="num">${fmt(rowBill(r))}</td><td class="notes">${esc(r.note||"—")}</td></tr>`).join("");
-  const root=document.createElement("div");
-  root.style.cssText="width:1100px;padding:24px;background:#fff;color:#111;font-family:Arial,sans-serif;box-sizing:border-box";
-  root.innerHTML=`<div style="font-size:12px;font-weight:800;letter-spacing:.3px;margin-bottom:6px">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div>
-  <h1 style="color:#d71920;font-size:26px;margin:12px 0">CENTRALIZATOR SERVICII PROIECTARE</h1>
-  <div style="color:#666;font-size:13px;margin-bottom:20px">${esc(names[month])} ${YEAR}<br>Colaborator: ${(()=>{const c=(data.find(r=>(r.collaborator||"").trim())?.collaborator)||"—";return c.trim().toUpperCase()==="VDM"?"VDM MOBILIART SRL":esc(c)})()}</div>
-  <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px"><thead><tr style="background:#171717;color:#fff"><th style="width:18%;padding:9px;text-align:left">Client</th><th style="width:17%;padding:9px;text-align:left">Încăpere</th><th style="width:17%;padding:9px;text-align:right">Valoare lucrare</th><th style="width:17%;padding:9px;text-align:right">De facturat</th><th style="width:31%;padding:9px;text-align:left">Observații</th></tr></thead><tbody>${rows}</tbody></table>
-  <div style="text-align:right;font-weight:bold;margin-top:18px;font-size:15px">Total de facturat: <span style="color:#d71920">${fmt(billv)}</span></div>
-  <div style="margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;line-height:1.45;color:#666">Centralizator întocmit pe baza situației centralizate a proiectelor pusă la dispoziție de Client, conform Contractului de prestări servicii și Actului adițional nr. 1. Sunt incluse exclusiv lucrările pentru care serviciile de proiectare au fost efectuate de Prestator.</div>`;
-  document.body.appendChild(root);
-  if(button){button.disabled=true;button.dataset.oldText=button.textContent;button.textContent="Se generează PDF…"}
-  try{
-    await html2pdf().set({margin:10,filename:`Centralizator_${names[month]}_${YEAR}.pdf`.replace(/[^a-z0-9_.-]/gi,"_"),image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"},pagebreak:{mode:["css","legacy"]}}).from(root).save();
-  }catch(e){alert("Nu am putut genera PDF-ul: "+(e?.message||e))}
-  finally{root.remove();if(button){button.disabled=false;button.textContent=button.dataset.oldText||"Export PDF"}}
+function exportPDF(){
+  const selectedRows=finalizedRows();
+  if(!selectedRows.length){
+    alert(`Nu există lucrări finalizate pentru ${names[month]} ${YEAR}.`);
+    return;
+  }
+  const billv=selectedRows.reduce((a,r)=>a+rowBill(r),0);
+  const rows=selectedRows.map(r=>`<tr><td>${esc(r.client)}</td><td>${esc(r.room)}</td><td class="num">${r.value?fmt(r.value):"—"}</td><td class="num">${fmt(rowBill(r))}</td><td class="notes">${esc(r.note||"—")}</td></tr>`).join("");
+  const collabs=[...new Set(selectedRows.map(r=>(r.collaborator||"").trim()).filter(Boolean))];
+  const collabLabel=collabs.length===1
+    ? (collabs[0].toUpperCase()==="VDM"?"VDM MOBILIART SRL":esc(collabs[0]))
+    : (collabs.length>1?"Toți colaboratorii":"—");
+  const w=window.open("","_blank","width=1100,height=850");
+  if(!w){
+    alert("Browserul a blocat fereastra de print. Permite pop-up pentru acest site și încearcă din nou.");
+    return;
+  }
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Centralizator ${names[month]} ${YEAR}</title>
+  <style>
+    @page{size:A4 portrait;margin:16mm}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#fff;color:#111}
+    body{font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.4}
+    .page{width:100%;max-width:178mm;margin:0 auto}
+    .provider{font-size:12px;font-weight:800;letter-spacing:.3px;margin-bottom:6px}
+    h1{color:#d71920;font-size:24px;line-height:1.15;margin:18px 0 26px}
+    .sub{color:#666;font-size:13px;margin-bottom:26px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    th{color:#888;font-weight:600;text-align:center;border-bottom:1px solid #ccc}
+    th,td{padding:8px 6px;border-bottom:1px solid #d7d7d7;vertical-align:top;font-size:10px}
+    th:nth-child(1){width:17%}th:nth-child(2){width:15%}
+    th:nth-child(3){width:17%}th:nth-child(4){width:16%}th:nth-child(5){width:35%}
+    .num{text-align:right;white-space:nowrap}
+    .notes{white-space:pre-wrap;overflow-wrap:anywhere}
+    .footer{text-align:right;font-size:18px;font-weight:bold;margin-top:20px}
+    .red{color:#d71920}
+    .legal{margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;line-height:1.45;color:#666}
+    @media print{.page{max-width:none}}
+  </style></head><body><main class="page">
+    <div class="provider">MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</div>
+    <h1>CENTRALIZATOR SERVICII PROIECTARE</h1>
+    <div class="sub">${names[month]} ${YEAR}<br>Colaborator: ${collabLabel}</div>
+    <table><thead><tr><th>Client</th><th>Încăpere</th><th>Valoare lucrare</th><th>De facturat</th><th>Observații</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="footer">Total de facturat: <span class="red">${fmt(billv)}</span></div>
+    <div class="legal">Centralizator întocmit pe baza situației centralizate a proiectelor pusă la dispoziție de Client, conform Contractului de prestări servicii și Actului adițional nr. 1. Sunt incluse exclusiv lucrările pentru care serviciile de proiectare au fost efectuate de Prestator.</div>
+  </main><script>window.onload=function(){setTimeout(function(){window.focus();window.print()},250)}<\/script></body></html>`);
+  w.document.close();
 }
-
 function switchSettingsTab(tab){
  document.querySelectorAll('.settingsTab').forEach(b=>b.classList.toggle('active',b.dataset.settingsTab===tab));
  document.querySelectorAll('.settingsPane').forEach(p=>p.classList.toggle('active',p.id==='settings-'+tab));
