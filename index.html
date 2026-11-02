@@ -1600,7 +1600,7 @@ function render(){
     </div>`).join("")}</div></section>`).join("");
   }
   // Totaluri și estimare netă pentru categoria selectată.
-  const summaryRows = roomView==='pending' ? [{label:'În curs',rows:data.filter(r=>r.pending)}] : roomView==='finalized' ? [{label:'Finalizate',rows:data.filter(r=>!r.pending)}] : [{label:'În curs',rows:data.filter(r=>r.pending)},{label:'Finalizate',rows:data.filter(r=>!r.pending)}];
+  const summaryRows = roomView==='pending' ? [{label:'În curs',rows:data.filter(r=>r.pending)}] : roomView==='finalized' ? [{label:'Finalizate',rows:data.filter(r=>!r.pending)}] : [{label:'În curs',rows:data.filter(r=>r.pending)},{label:'Finalizate',rows:data.filter(r=>!r.pending)},{label:'Total orientativ (toate lucrările)',rows:data}];
   const summaryHtml=summaryRows.map(g=>{const gross=g.rows.reduce((a,r)=>a+rowBill(r),0);const net=estimateNetMonthly(gross);return `<div class="workCategoryTotal"><div><small>${g.label} · De facturat</small><b>${fmt(gross)}</b></div><div style="text-align:right"><small>Rămâne în mână estimat</small><b class="netValue">${fmt(net)}</b></div></div>`}).join('');
   document.querySelectorAll('.workCategoryTotals').forEach(el=>el.remove());
   body.insertAdjacentHTML('afterend',`<div class="workCategoryTotals">${summaryHtml}</div>`);
