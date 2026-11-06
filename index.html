@@ -2525,4 +2525,178 @@ function renderMobiliExcelPreview(){
 }
 async function applyMobiliExcelValue(dataIndex,orderIndex,field){const row=data[Number(dataIndex)],order=mobiliExcelOrders[Number(orderIndex)];if(!row||!row.pending||!order)return;let amount,applyKey;if(field==="project"){amount=order.project;if(!amount)return;if(!confirm(`Coloana PROIECTE este la nivelul comenzii pentru ${order.client}. O trec ca valoare a lucrării «${row.room}»?`))return;applyKey=`${row.id}|${order.excelRow}|project`}else if(field==="manualRoom"){const roomIndex=mobiliManualRooms[`${dataIndex}|${orderIndex}`],picked=order.roomCols[Number(roomIndex)];if(!picked)return;amount=picked.value;if(!confirm(`Ai ales coloana «${picked.name}» din comanda ${order.client}, cu valoarea ${fmt(amount)}. O aplic pentru lucrarea «${row.room}»?`))return;applyKey=`${row.id}|${order.excelRow}|manual:${picked.name}`}else{const found=mobiliRoomAmount(order,row.room);if(!found)return;amount=found.value;if(!confirm(`Actualizez valoarea pentru «${row.room}» · ${row.client} la ${fmt(amount)}?`))return;applyKey=`${row.id}|${order.excelRow}|room`}clearTimeout(editTimers[row.id]);const oldValue=Number(row.value)||0,oldVerified=!!row.verified;row.value=amount;row.verified=true;calc();const result=await saveRoom(row);if(!result?.ok){row.value=oldValue;row.verified=oldVerified;calc();alert(`Modificarea nu s-a salvat. Valorile anterioare au fost păstrate.\n\n${result?.error||"Verifică conexiunea și încearcă din nou."}`);renderMobiliExcelPreview();return}mobiliAppliedImports[applyKey]=true;render();renderMobiliExcelPreview()}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!document.getElementById("mobiliExcelImportModal")?.hidden)closeMobiliExcelImport()});
-</script></body></html>
+</script><style id="imos-route-layout-style">
+@media(min-width:801px){
+  .sideNavGroup[open] .sideNavSub{position:static!important;inset:auto!important;z-index:auto!important;display:grid!important;flex-direction:initial!important;align-items:stretch!important;justify-content:flex-start!important;gap:3px!important;padding:4px 0 8px 42px!important;overflow:visible!important;background:transparent!important;border:0!important}
+  .sideNavGroup[open] .sideNavSub button{width:100%!important;max-width:none!important;min-height:0!important;padding:9px 10px!important;text-align:left!important;font-size:12px!important;background:transparent!important;color:#aeb4bd!important;border:0!important;border-radius:7px!important}
+  .sideNavGroup[open] .sideNavSub button:hover{background:#222!important;color:#fff!important}
+}
+.sideNavGroup.route-active>summary{background:#1d1d1d;color:#fff}
+.sideNavGroup.route-active .sideNavIcon{color:#ff555d}
+.sideNavGroup .sideNavSub{display:none!important}
+.sideNavGroup summary i{display:none!important}
+main .imosRoutePage{display:none;min-width:0}
+main .imosRoutePage.imosRouteActive{display:block}
+.imosRouteHead{margin:0 0 18px;padding:3px 0 16px;border-bottom:1px solid var(--line,#333)}
+.imosRouteHead h2{margin:0;font-size:25px;line-height:1.2;color:var(--ink,#f4f4f4)}
+.imosRouteHead p{margin:6px 0 0;color:var(--muted,#999);font-size:13px}
+.imosBillingTabs{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px;border-bottom:1px solid var(--line,#333)}
+.imosBillingTabs button{border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted,#999);padding:10px 11px;font:600 12px Inter,Segoe UI,Arial,sans-serif;cursor:pointer}
+.imosBillingTabs button[aria-current="page"]{border-bottom-color:#d71920;color:var(--ink,#fff)}
+.imosBillingPanel[hidden]{display:none!important}
+body[data-imos-route-workspace] #workspaceOverlay .workspaceTabs{display:none!important}
+body[data-imos-route-workspace] #workspaceOverlay .workspaceTop{min-height:72px}
+@media(max-width:800px){.imosRouteHead h2{font-size:22px}.imosBillingTabs{overflow:auto;flex-wrap:nowrap}.imosBillingTabs button{white-space:nowrap}}
+</style>
+<script>
+(()=>{
+  const main=document.querySelector('main');
+  if(!main||document.getElementById('imosRouteDashboard'))return;
+  const $=(selector,root=main)=>root.querySelector(selector);
+  const createPage=(id,title,description)=>{
+    const page=document.createElement('section');
+    page.id=id;page.className='imosRoutePage';
+    page.innerHTML=`<header class="imosRouteHead"><h2>${title}</h2><p>${description}</p></header>`;
+    return page;
+  };
+  const dashboard=createPage('imosRouteDashboard','Dashboard','Rezumatul perioadei selectate.');
+  const billing=createPage('imosRouteBilling','Facturare','Facturare lunară, facturi și istoricul comunicărilor.');
+  const projects=createPage('imosRouteProjects','Proiecte','Lucrările perioadei și proiectele extra.');
+  const cloudBar=$('#cloudBar');
+  if(cloudBar)cloudBar.after(dashboard,billing,projects);else main.prepend(dashboard,billing,projects);
+
+  const dashboardContent=['.cards','#nextMini','#nextPendingList','.summaryGrid'];
+  dashboardContent.forEach(selector=>{const node=$(selector);if(node)dashboard.append(node)});
+
+  const billingTabs=document.createElement('div');
+  billingTabs.className='imosBillingTabs';billingTabs.setAttribute('role','tablist');billingTabs.setAttribute('aria-label','Secțiuni de facturare');
+  billingTabs.innerHTML='<button type="button" data-billing-view="monthly">Facturare lunară</button><button type="button" data-billing-view="history">Istoric facturi</button><button type="button" data-billing-view="emails">Istoric e-mailuri</button><button type="button" data-billing-view="annual">Evoluție anuală</button>';
+  billing.querySelector('.imosRouteHead').after(billingTabs);
+  const projectTabs=document.createElement('div');
+  projectTabs.className='imosBillingTabs';projectTabs.setAttribute('role','tablist');projectTabs.setAttribute('aria-label','Secțiuni de proiecte');
+  projectTabs.innerHTML='<button type="button" data-project-view="monthly" aria-current="page">Lucrările lunii</button><button type="button" data-project-view="extras">Proiecte extra</button>';
+  projects.querySelector('.imosRouteHead').after(projectTabs);
+  const extrasPanel=document.createElement('div');extrasPanel.id='imosProjectExtrasPanel';extrasPanel.hidden=true;projects.append(extrasPanel);
+  const extrasPane=document.getElementById('ws-extras');if(extrasPane)extrasPanel.append(extrasPane);
+  const extrasSetup=document.createElement('div');extrasSetup.className='wsSetup';extrasSetup.textContent='Secțiunea trebuie activată o singură dată în Supabase cu fișierul SQL inclus în această versiune.';
+  extrasSetup.hidden=true;extrasPanel.append(extrasSetup);
+  const billingViews={monthly:[],history:[],emails:[],annual:[]};
+  const monthlyAssistant=$('#monthlyAssistant');
+  const monthlyInvoice=[...main.querySelectorAll('.compactSection.invoicePanel')].find(node=>node.id!=='invoiceHistoryPanel'&&node.id!=='emailHistoryPanel');
+  const invoiceHistory=$('#invoiceHistoryPanel');
+  const emailHistory=$('#emailHistoryPanel');
+  const annualPanel=[...main.querySelectorAll('.compactSection')].find(node=>/Evoluție anuală/i.test(node.querySelector('.compactHead')?.textContent||''));
+  const addBillingPanel=(key,nodes)=>{
+    const panel=document.createElement('div');panel.className='imosBillingPanel';panel.dataset.billingPanel=key;
+    nodes.filter(Boolean).forEach(node=>panel.append(node));billing.append(panel);billingViews[key].push(panel);
+  };
+  addBillingPanel('monthly',[monthlyAssistant,monthlyInvoice]);
+  addBillingPanel('history',[invoiceHistory]);
+  addBillingPanel('emails',[emailHistory]);
+  addBillingPanel('annual',[annualPanel]);
+
+  const top=$('.top');if(top)projects.append(top);
+  const search=$('#searchWrap');if(search)projects.append(search);
+  const works=$('#worksPanel');if(works)projects.append(works);
+
+  const originalCloseWorkspace=window.closeWorkspace;
+  window.closeWorkspace=function(){if(typeof originalCloseWorkspace==='function')originalCloseWorkspace();delete document.body.dataset.imosRouteWorkspace};
+
+  const sectionForGroup=group=>{
+    const label=group?.querySelector('summary')?.textContent||'';
+    if(label.includes('Documente'))return 'documents';
+    if(label.includes('Facturare'))return 'billing';
+    if(label.includes('Proiecte'))return 'projects';
+    if(label.includes('Colaboratori'))return 'collaborators';
+    if(label.includes('Administrare'))return 'admin';
+    return 'home';
+  };
+  const setActiveNav=section=>{
+    const home=document.querySelector('.sideNavBtn');
+    if(home){home.classList.toggle('active',section==='home');if(section==='home')home.setAttribute('aria-current','page');else home.removeAttribute('aria-current')}
+    document.querySelectorAll('.sideNavGroup').forEach(group=>group.classList.toggle('route-active',sectionForGroup(group)===section));
+  };
+  const showBillingView=view=>{
+    const selected=billingViews[view]?view:'monthly';
+    billing.querySelectorAll('.imosBillingPanel').forEach(panel=>panel.hidden=panel.dataset.billingPanel!==selected);
+    billingTabs.querySelectorAll('button').forEach(button=>{if(button.dataset.billingView===selected)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});
+  };
+  const showProjectTab=view=>{
+    const selected=view==='extras'?'extras':'monthly';
+    projectTabs.querySelectorAll('button').forEach(button=>{if(button.dataset.projectView===selected)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});
+    if(works)works.style.display=selected==='monthly'?'':'none';
+    extrasPanel.hidden=selected!=='extras';
+    if(selected==='extras'){
+      if(typeof window.switchWorkspace==='function')window.switchWorkspace('extras');
+      const setupNeeded=document.getElementById('wsSetup')?.classList.contains('active');
+      extrasSetup.hidden=!setupNeeded;
+      if(extrasPane){extrasPane.classList.toggle('active',!setupNeeded);extrasPane.style.display=setupNeeded?'none':''}
+    }else if(extrasPane)extrasPane.classList.remove('active');
+  };
+  billingTabs.addEventListener('click',event=>{
+    const button=event.target.closest('[data-billing-view]');if(!button)return;
+    const view=button.dataset.billingView;showBillingView(view);
+    const route=view==='monthly'?'billing-monthly':view==='history'?'billing-history':view==='emails'?'billing-emails':'billing-annual';
+    history.replaceState(null,'','#'+route);
+  });
+  projectTabs.addEventListener('click',event=>{
+    const button=event.target.closest('[data-project-view]');if(!button)return;
+    if(button.dataset.projectView==='extras')route('extras');else route('projects','monthly');
+  });
+  const route=(section,view)=>{
+    setActiveNav(section==='extras'?'projects':section);
+    if(section==='projects')showProjectTab('monthly');
+    if(section==='extras'){
+      window.closeWorkspace();
+      main.querySelectorAll('.imosRoutePage').forEach(page=>page.classList.toggle('imosRouteActive',page.id==='imosRouteProjects'));
+      showProjectTab('extras');history.replaceState(null,'','#extras');window.scrollTo({top:0,behavior:'smooth'});return;
+    }
+    if(section==='documents'||section==='collaborators'||section==='admin'){
+      document.body.dataset.imosRouteWorkspace=section;
+      history.replaceState(null,'','#'+section);
+      if(typeof window.openWorkspace==='function')window.openWorkspace(section==='documents'?'documents':section==='collaborators'?'collabs':'settings');
+      return;
+    }
+    window.closeWorkspace();
+    const id=section==='home'?'imosRouteDashboard':section==='projects'?'imosRouteProjects':'imosRouteBilling';
+    main.querySelectorAll('.imosRoutePage').forEach(page=>page.classList.toggle('imosRouteActive',page.id===id));
+    if(section==='billing')showBillingView(view||'monthly');
+    history.replaceState(null,'','#'+(section==='home'?'home':section==='projects'?'projects-monthly':view||'billing-monthly'));
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+  document.addEventListener('click',event=>{
+    const homeButton=event.target.closest('.sideNavBtn');
+    if(homeButton){event.preventDefault();event.stopImmediatePropagation();route('home');return}
+    const subButton=event.target.closest('.sideNavSub button');
+    if(subButton){
+      event.preventDefault();event.stopImmediatePropagation();
+      const group=subButton.closest('.sideNavGroup');const section=sectionForGroup(group);const label=subButton.textContent.trim();
+      document.querySelectorAll('.sideNavGroup').forEach(item=>item.removeAttribute('open'));
+      if(section==='documents')route('documents');
+      else if(section==='collaborators')route('collaborators');
+      else if(section==='admin')route('admin');
+      else if(section==='projects')route(label.includes('extra')?'extras':'projects','monthly');
+      else if(section==='billing')route('billing',label.includes('Facturare lunară')?'monthly':label.includes('e-mail')?'emails':'history');
+      return;
+    }
+    const workspaceExtras=event.target.closest('.workspaceTab[data-tab="extras"]');
+    if(workspaceExtras){event.preventDefault();event.stopImmediatePropagation();route('extras');return}
+    const summary=event.target.closest('.sideNavGroup summary');
+    if(summary){
+      event.preventDefault();
+      document.querySelectorAll('.sideNavGroup').forEach(item=>item.removeAttribute('open'));
+      const section=sectionForGroup(summary.closest('.sideNavGroup'));
+      if(section==='documents')route('documents');
+      else if(section==='collaborators')route('collaborators');
+      else if(section==='admin')route('admin');
+      else if(section==='billing')route('billing','monthly');
+      else if(section==='projects')route('projects','monthly');
+    }
+  },true);
+  const initial=(location.hash||'').slice(1);
+  const initialMap={'home':['home'],'documents':['documents'],'collaborators':['collaborators'],'admin':['admin'],'extras':['extras'],'billing-monthly':['billing','monthly'],'billing-history':['billing','history'],'billing-emails':['billing','emails'],'billing-annual':['billing','annual'],'projects-monthly':['projects','monthly']};
+  const start=initialMap[initial]||['home'];
+  route(start[0],start[1]);
+})();
+</script>
+</body></html>
