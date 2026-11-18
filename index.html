@@ -1677,14 +1677,27 @@ function renderInvoices(){
     </div>
   </div>`).join("");
 }
+function getNextSoloInvoiceNumber(year=YEAR){
+  const yy=String(year).slice(-2);
+  const nums=[];
+  (invoiceHistory||[]).forEach(x=>{
+    const m=String(x.invoice_number||"").match(/^GM-(\d+)-(\d{2})\/SOLO$/i);
+    if(m&&m[2]===yy)nums.push(Number(m[1]));
+  });
+  (extraProjects||[]).forEach(x=>{
+    const m=String(x.solo_invoice_number||"").match(/^GM-(\d+)-(\d{2})\/SOLO$/i);
+    if(m&&m[2]===yy)nums.push(Number(m[1]));
+  });
+  return `GM-${String(Math.max(0,...nums)+1).padStart(2,"0")}-${yy}/SOLO`;
+}
 async function registerInvoice(collaborator){
   if(!invoiceHistoryReady){const e=window.invoiceHistoryError||{}; alert("Eroare Supabase la istoricul facturilor:\\n\\n"+(e.message||"Eroare necunoscută")+(e.code?"\\nCod: "+e.code:"")+(e.details?"\\nDetalii: "+e.details:"")+(e.hint?"\\nHint: "+e.hint:""));return}
   const rows=finalizedRows().filter(r=>(r.collaborator||"").trim()===collaborator);
   if(!rows.length)return;
   const total=rows.reduce((a,r)=>a+rowBill(r),0);
 
-  // Numărul Solo se generează din luna și anul selectate: GM-10-26/SOLO.
-  const invoiceNumber=`GM-${String(month+1).padStart(2,"0")}-${String(YEAR).slice(-2)}/SOLO`;
+  // Numerotare comună, consecutivă pentru facturile lunare și extra.
+  const invoiceNumber=getNextSoloInvoiceNumber(YEAR);
   // Data se completează automat cu data locală a emiterii.
   const now=new Date();
   const invoiceDate=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
@@ -2069,11 +2082,12 @@ async function addPfaTask(){const t=prompt("Ce ai de rezolvat?");if(!t||!t.trim(
 
 // v16.64 - date factură Solo pentru proiecte extra
 function extraInvoiceRon(x){
- const rate=Number(localStorage.getItem("imos_extra_eur_rate"))||5.30;
+ const rate=getExtraEurRate();
  return extraCurrency(x)==="EUR"?(Number(x.amount)||0)*rate:(Number(x.amount)||0);
 }
 function extraInvoiceArticle(x){
- return `Servicii de proiectare mobilier – ${x.project_name||x.client_name||"proiect extra"}`;
+ const project=String(x.project_name||"").trim();
+ return `Servicii proiectare mobilier conf. anexă${project?` – ${project}`:""}`;
 }
 async function copyExtraInvoiceAmount(id){
  const x=extraProjects.find(v=>v.id===id);if(!x)return;
@@ -2089,7 +2103,7 @@ async function copyExtraInvoiceArticle(id){
 }
 async function saveExtraInvoiceNumber(id){
  const x=extraProjects.find(v=>v.id===id);if(!x)return;
- const value=prompt("Numărul facturii emisă în Solo:",x.solo_invoice_number||"");
+ const value=prompt("Numărul facturii emisă în Solo:",x.solo_invoice_number||getNextSoloInvoiceNumber(YEAR));
  if(value===null)return;
  const {error}=await sb.from("extra_projects").update({solo_invoice_number:value.trim()||null}).eq("id",id);
  if(error){alert("Nu am putut salva numărul Solo. Verifică dacă ai rulat SQL-ul pentru coloana solo_invoice_number.\\n"+error.message);return}
