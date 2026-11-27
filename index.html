@@ -1787,12 +1787,14 @@ function closeInvoiceEmailPreview(){
 }
 function sendInvoiceGmail(invoiceId){
   const invoice=invoiceHistory.find(x=>x.id===invoiceId); if(!invoice)return;
-  const pdf=pfaFiles.find(x=>String(x.invoice_id)===String(invoiceId) && String(x.category||"").toLowerCase().includes("factur") && String(x.file_name||"").toLowerCase().endsWith(".pdf") && !!x.storage_path);
-  if(!pdf){alert("Nu găsesc PDF-ul facturii asociat acestei înregistrări. Încarcă mai întâi factura prin butonul 📎 PDF din Istoric facturi.");return}
+  let pdf=pfaFiles.find(x=>String(x.invoice_id)===String(invoiceId) && String(x.category||"").toLowerCase().includes("factur") && String(x.file_name||"").toLowerCase().endsWith(".pdf") && !!x.storage_path);
+  let extraPdfs=pfaFiles.filter(x=>String(x.invoice_id)===String(invoiceId) && !String(x.category||"").toLowerCase().includes("factur") && String(x.file_name||"").toLowerCase().endsWith(".pdf") && !!x.storage_path);
   closeInvoiceEmailPreview();
   const monthName=(names[(Number(invoice.month)||1)-1]||"").toString();
   const invoiceNo=(invoice.invoice_number||"fără număr").toString();
-  const subject=`Micleru George – Factura nr. ${invoiceNo} – ${monthName} ${invoice.year||""}`.trim();
+  const extraProject=extraProjects.find(x=>String(x.solo_invoice_number||"").trim()===String(invoiceNo).trim());
+  const projectLabel=extraProject?String(extraProject.project_name||extraProject.client_name||"").trim():"";
+  const subject=`Micleru George – Factura nr. ${invoiceNo}${projectLabel?` – Proiect ${projectLabel}`:` – ${monthName} ${invoice.year||""}`}`.trim();
   const modal=document.createElement("div");
   modal.id="invoiceEmailPreview";
   modal.style.cssText="position:fixed;inset:0;z-index:30000;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px";
@@ -1800,27 +1802,81 @@ function sendInvoiceGmail(invoiceId){
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px"><h2 id="invoiceEmailTitle" style="margin:0;font-size:21px">Verifică e-mailul înainte de trimitere</h2><button type="button" id="invoiceEmailX" aria-label="Închide" style="border:0;background:transparent;font-size:25px;cursor:pointer;color:inherit">×</button></div>
     <p style="font-size:13px;color:var(--muted,#666);margin:0 0 16px">E-mailul NU se trimite când deschizi această fereastră. Se trimite numai după ce apeși „Trimite acum”.</p>
     <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailTo">Către</label><input id="invoiceEmailTo" type="email" value="contabilitate@mobiliart.ro" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
-    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailSubject">Subiect</label><input id="invoiceEmailSubject" type="text" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
+    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailSubject">Subiect (poți modifica titlul)</label><input id="invoiceEmailSubject" type="text" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
     <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailBody">Mesaj</label><textarea id="invoiceEmailBody" rows="5" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit;line-height:1.5">Bună ziua,
 
 Vă transmit atașată factura aferentă serviciilor de proiectare mobilier.
 
 Mulțumesc!</textarea>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:12px;margin-top:14px"><span style="font-size:23px">📎</span><div style="flex:1;min-width:180px"><b>PDF-ul facturii va fi atașat</b><div id="invoiceEmailFileName" style="font-size:12px;color:var(--muted,#666);margin-top:3px;overflow-wrap:anywhere"></div></div><button type="button" id="invoiceEmailOpenPdf" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer">Deschide PDF</button></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:12px;margin-top:14px"><span style="font-size:23px">📎</span><div style="flex:1;min-width:180px"><b>Factura PDF</b><div id="invoiceEmailFileName" style="font-size:12px;color:var(--muted,#666);margin-top:3px;overflow-wrap:anywhere"></div></div><button type="button" id="invoiceEmailOpenPdf" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer">Vezi PDF</button><button type="button" id="invoiceEmailReplacePdf" style="border:1px solid #d71920;background:transparent;color:#d71920;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer">Schimbă factura PDF</button><input id="invoiceEmailPdfPicker" type="file" accept="application/pdf,.pdf" hidden></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:12px;margin-top:9px"><span style="font-size:23px">📎</span><div style="flex:1;min-width:180px"><b>Documente suplimentare (ex. anexă)</b><div id="invoiceEmailExtraFiles" style="font-size:12px;color:var(--muted,#666);margin-top:3px;overflow-wrap:anywhere">Nu ai adăugat documente suplimentare.</div></div><button type="button" id="invoiceEmailAddPdf" style="border:1px solid #15966a;background:transparent;color:#15966a;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer">+ Adaugă PDF</button><input id="invoiceEmailExtraPdfPicker" type="file" accept="application/pdf,.pdf" multiple hidden></div>
     <div style="display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:20px"><button type="button" id="invoiceEmailCancel" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer">Anulează</button><button type="button" id="invoiceEmailSend" style="border:0;background:#d71920;color:#fff;border-radius:9px;padding:11px 16px;font-weight:900;cursor:pointer">Trimite acum</button></div>
   </section>`;
   document.body.appendChild(modal);
   const byId=id=>modal.querySelector("#"+id);
   byId("invoiceEmailSubject").value=subject;
-  byId("invoiceEmailFileName").textContent=pdf.file_name||pdf.label||"Factura PDF";
+  byId("invoiceEmailFileName").textContent=pdf?(pdf.file_name||pdf.label||"Factura PDF"):"Nu este atașat niciun PDF. Adaugă factura înainte de trimitere.";
+  const renderExtraPdfNames=()=>{byId("invoiceEmailExtraFiles").textContent=extraPdfs.length?extraPdfs.map(f=>f.file_name||"Document PDF").join(" · "):"Nu ai adăugat documente suplimentare.";};
+  renderExtraPdfNames();
+  byId("invoiceEmailOpenPdf").disabled=!pdf;
+  byId("invoiceEmailSend").disabled=!pdf;
   byId("invoiceEmailX").onclick=closeInvoiceEmailPreview;
   byId("invoiceEmailCancel").onclick=closeInvoiceEmailPreview;
   // Nu închide fereastra la click pe fundal: selecția textului cu mouse-ul poate termina în afara dialogului.
-  byId("invoiceEmailOpenPdf").onclick=()=>openPfaFile(pdf.id);
+  byId("invoiceEmailOpenPdf").onclick=()=>{if(pdf)openPfaFile(pdf.id)};
+  byId("invoiceEmailReplacePdf").onclick=()=>byId("invoiceEmailPdfPicker").click();
+  byId("invoiceEmailPdfPicker").onchange=async()=>{
+    const file=byId("invoiceEmailPdfPicker").files?.[0];if(!file)return;
+    if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){alert("Alege un fișier PDF.");return}
+    if(!confirm(`Înlocuiești atașamentul curent cu „${file.name}”?`))return;
+    setLoading(true);
+    try{
+      const safe=file.name.replace(/[^\w.\-() ]+/g,"_");
+      const path=`${user.id}/pfa/facturi/${Date.now()}_${safe}`;
+      const {error:upErr}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});
+      if(upErr)throw upErr;
+      const {data:newRow,error:insErr}=await sb.from("pfa_files").insert({user_id:user.id,category:"Factură SOLO",label:invoiceNo,file_name:file.name,storage_path:path,invoice_id:invoiceId}).select().single();
+      if(insErr){await sb.storage.from(BUCKET).remove([path]);throw insErr}
+      // Păstrăm un singur PDF activ per factură, astfel încât Gmail să atașeze exact fișierul afișat.
+      const oldFiles=pfaFiles.filter(f=>String(f.invoice_id)===String(invoiceId)&&String(f.id)!==String(newRow.id)&&String(f.category||"").toLowerCase().includes("factur")&&String(f.file_name||"").toLowerCase().endsWith(".pdf"));
+      for(const old of oldFiles){if(old.storage_path)await sb.storage.from(BUCKET).remove([old.storage_path]);await sb.from("pfa_files").delete().eq("id",old.id)}
+      await refreshAll();
+      pdf=pfaFiles.find(f=>String(f.invoice_id)===String(invoiceId)&&String(f.id)===String(newRow.id))||newRow;
+      byId("invoiceEmailFileName").textContent=pdf.file_name||file.name;
+      byId("invoiceEmailOpenPdf").disabled=false;
+      byId("invoiceEmailSend").disabled=false;
+      alert("Factura PDF a fost atașată/înlocuită. Verifică atașamentul înainte de trimitere.");
+    }catch(e){alert("Nu am putut înlocui factura PDF: "+(e.message||e))}
+    finally{setLoading(false);byId("invoiceEmailPdfPicker").value=""}
+  };
+  byId("invoiceEmailAddPdf").onclick=()=>byId("invoiceEmailExtraPdfPicker").click();
+  byId("invoiceEmailExtraPdfPicker").onchange=async()=>{
+    const files=[...(byId("invoiceEmailExtraPdfPicker").files||[])];if(!files.length)return;
+    const invalid=files.find(f=>f.type!=="application/pdf"&&!f.name.toLowerCase().endsWith(".pdf"));
+    if(invalid){alert("Poți adăuga doar documente PDF.");byId("invoiceEmailExtraPdfPicker").value="";return}
+    setLoading(true);
+    try{
+      for(const file of files){
+        const safe=file.name.replace(/[^\w.\-() ]+/g,"_");
+        const path=`${user.id}/pfa/facturi/${Date.now()}_${safe}`;
+        const {error:upErr}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});
+        if(upErr)throw upErr;
+        const {data:newRow,error:insErr}=await sb.from("pfa_files").insert({user_id:user.id,category:"Anexă PDF",label:invoiceNo,file_name:file.name,storage_path:path,invoice_id:invoiceId}).select().single();
+        if(insErr){await sb.storage.from(BUCKET).remove([path]);throw insErr}
+        extraPdfs.push(newRow);
+      }
+      await refreshAll();
+      extraPdfs=pfaFiles.filter(f=>String(f.invoice_id)===String(invoiceId)&&!String(f.category||"").toLowerCase().includes("factur")&&String(f.file_name||"").toLowerCase().endsWith(".pdf")&&!!f.storage_path);
+      renderExtraPdfNames();
+      alert("Documentul suplimentar a fost adăugat. Va fi inclus împreună cu factura la trimitere.");
+    }catch(e){alert("Nu am putut adăuga PDF-ul suplimentar: "+(e.message||e))}
+    finally{setLoading(false);byId("invoiceEmailExtraPdfPicker").value=""}
+  };
   byId("invoiceEmailSend").onclick=async()=>{
     const recipient=byId("invoiceEmailTo").value.trim();
     const emailSubject=byId("invoiceEmailSubject").value.trim();
     const message=byId("invoiceEmailBody").value.trim();
+    if(!pdf){alert("Atașează mai întâi PDF-ul facturii.");return}
     if(!recipient||!emailSubject||!message){alert("Completează destinatarul, subiectul și mesajul.");return}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)){alert("Adresa de e-mail nu pare validă.");return}
     if(!confirm(`Confirmi trimiterea facturii ${invoiceNo} către ${recipient}?`))return;
@@ -1828,7 +1884,8 @@ Mulțumesc!</textarea>
     sendButton.disabled=true;sendButton.textContent="Se trimite…";
     setLoading(true);
     try{
-      const {data,error}=await sb.functions.invoke("gmail-send",{body:{invoice_id:invoiceId,recipient,subject:emailSubject,message}});
+      const attachmentIds=[...(pdf?[pdf.id]:[]),...extraPdfs.map(f=>f.id)].filter(Boolean);
+      const {data,error}=await sb.functions.invoke("gmail-send",{body:{invoice_id:invoiceId,attachment_ids:attachmentIds,recipient,subject:emailSubject,message}});
       if(error){let msg=error.message||"Eroare la trimitere.";try{const body=await error.context?.json?.();if(body?.error)msg=body.error}catch{}alert(msg);return}
       if(data?.success){closeInvoiceEmailPreview();alert(data.message||"Factura a fost trimisă.");await refreshAll();renderEmailHistory();renderMonthlyAssistant();}
       else alert(data?.error||"Nu s-a putut confirma trimiterea.");
@@ -1972,7 +2029,7 @@ function renderDocPreview(){
  const type=docVal("docGenType","Anexă proiect"),no=esc(docVal("docGenNo","1")),dateRaw=docVal("docGenDate"),contract=esc(docVal("docGenContract","2222 / 24.04.2024")),project=esc(docVal("docGenProject","[DENUMIRE PROIECT]")),pay=esc(docVal("docGenPay","Preț fix")),amount=Number(docVal("docGenAmount","0"))||0,unit=esc(docVal("docGenUnit")),collab=esc(collabDisplayName(docVal("docGenCollab","VDM"))),clientLegal=collab==="MobiliArt"?"VDM MOBILIART SRL":collab,date=dateRaw?new Date(dateRaw+"T12:00:00").toLocaleDateString("ro-RO"):new Date().toLocaleDateString("ro-RO");
  const pfaLegal=`<b>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</b>, cu sediul social în B-dul Bucureștii Noi, 136, et. Parter, ap. 5, Sector 1, București, CUI 47425679, nr. de înregistrare la Registrul Comerțului F40/154/2023, denumită în continuare <b>PRESTATOR</b>`;
  const clientParty=collab==="MobiliArt"
-   ? `<b>VDM MOBILIART SRL</b>, cu sediul social în JUD. CONSTANȚA, MUN. CONSTANȚA, BLD. I. C. BRĂTIANU, NR.28, C1-BIROU, CUI RO33716511, nr. de înregistrare la Registrul Comerțului J13/2055/2014, reprezentată de dl. Mihai Marius, în calitate de administrator, denumită în continuare <b>CLIENT</b>`
+   ? `<b>VDM MOBILIART SRL</b>, cu sediul social în Bd. I. C. Brătianu nr. 28, Constanța, CUI RO33716511, nr. de înregistrare la Registrul Comerțului J13/2055/2014, reprezentată de dl. Mihai Marius, în calitate de administrator, denumită în continuare <b>CLIENT</b>`
    : `<b>${clientLegal}</b>, în calitate de Beneficiar`;
  const docCurrency=(document.getElementById("docGenAmount")?.dataset.currency||"RON").toUpperCase();
  const fixedText=docCurrency==="EUR"?fmtEur(amount):fmt(amount);
@@ -2095,7 +2152,7 @@ function renderWorkspace(){if(!pfaWorkspaceReady)return;const fl=document.getEle
  const gdl=document.getElementById("generatedDocsList"), gds=document.getElementById("generatedDocsSetup");if(gdl){if(!generatedDocsReady){gds.innerHTML='<div class="extraSetup">Pentru registrul documentelor trebuie creată o singură dată tabela <b>generated_documents</b> în Supabase. Rulează fișierul SQL livrat cu versiunea aceasta.</div>';gdl.innerHTML='';}else{gds.innerHTML='';gdl.innerHTML=generatedDocs.map(x=>`<div class="docRegistryRow"><div><b>${esc(x.doc_type)} ${esc(x.doc_number||"")}</b><div class="wsMuted">${esc(collabDisplayName(x.collaborator||""))}${x.project_name?` · ${esc(x.project_name)}`:""}</div></div><div>${formatRoDate(x.doc_date)}</div><div>${Number(x.amount)?fmt(x.amount):"—"}</div><div><select class="docStatus ${x.status==="Semnat"?"signed":x.status==="De semnat"?"sign":"draft"}" onchange="setGeneratedDocStatus('${x.id}',this.value)"><option ${x.status==="Draft"?"selected":""}>Draft</option><option ${x.status==="De semnat"?"selected":""}>De semnat</option><option ${x.status==="Semnat"?"selected":""}>Semnat</option></select></div><div class="docRegistryActions"><button class="mini" onclick="printSavedDocument('${x.id}')">PDF</button><button class="mini" onclick="deleteGeneratedDoc('${x.id}')">×</button></div></div>`).join("")||'<div class="wsMuted" style="padding:10px 0">Nu ai încă documente generate.</div>';}};
  const il=document.getElementById("wsInvoiceList");if(il)il.innerHTML=invoiceHistory.map(x=>{const f=pfaFiles.find(y=>y.invoice_id===x.id);return `<div class="wsFileRow"><div><b>${esc(x.invoice_number||"—")}</b> · ${(x.collaborator||"").trim().toUpperCase()==="VDM"?`<span class="brandMark mobiliartMark">MobiliΛrt</span>`:esc(x.collaborator||"—")}<div class="wsMuted">${formatRoDate(x.invoice_date)} · ${fmt(x.amount)}</div></div><span>${f?'PDF atașat':'Fără PDF'}</span><div>${f?`<button class="mini" onclick="openPfaFile('${f.id}')">Deschide PDF</button>`:`<button class="mini" onclick="invoicePdfAction('${x.id}')">+ Atașează PDF</button>`}</div></div>`}).join("")||'<div class="wsMuted">Nu ai facturi înregistrate.</div>';
  const cl=document.getElementById("wsCollabList");if(cl){const m=new Map();allRooms.forEach(r=>{const n=(r.collaborator||"").trim();if(n)m.set(n,(m.get(n)||0)+1)});getCustomCollabs().forEach(n=>{if(!m.has(n))m.set(n,0)});if(!m.has("VDM"))m.set("VDM",0);cl.innerHTML=[...m].map(([n,c])=>`<div class="wsFileRow"><div class="collabBrandRow">${n.toUpperCase()==="VDM"?`<span class="brandMark mobiliartMark">MobiliArt</span>`:`<b>${esc(collabDisplayName(n))}</b>`}<div class="wsMuted">${c} ${c===1?"lucrare":"lucrări"} în baza de date</div></div><span></span><div><button class="mini" onclick="document.getElementById('pfaFileLabel').value='${esc(collabDisplayName(n))}';switchWorkspace('documents')">Documente</button>${c===0&&n.toUpperCase()!=="VDM"?` <button class="mini" title="Șterge colaborator" onclick="removeCustomCollaborator('${esc(n)}')">×</button>`:""}</div></div>`).join("")||'<div class="wsMuted">Niciun colaborator.</div>'}
- const xl=document.getElementById("extraProjectList"), xs=document.getElementById("extraSummary"), xm=document.getElementById("extraSetupMsg"); if(xl){if(!extraProjectsReady){xm.innerHTML='<div class="extraSetup">Pentru Proiecte extra trebuie creată o singură dată tabela <b>extra_projects</b> în Supabase. Folosește fișierul SQL livrat cu această versiune.</div>';xl.innerHTML='';if(xs)xs.innerHTML='';}else{xm.innerHTML='';const yf=document.getElementById("extraYearFilter");const years=[...new Set(extraProjects.map(x=>new Date(x.created_at||Date.now()).getFullYear()))].sort((a,b)=>b-a);if(!years.includes(YEAR))years.push(YEAR);years.sort((a,b)=>b-a);if(yf){const prev=yf.value||String(YEAR);yf.innerHTML='<option value="all">Toate</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');yf.value=["all",...years.map(String)].includes(prev)?prev:String(YEAR)}const selectedYear=yf?.value||String(YEAR);const shown=selectedYear==="all"?extraProjects:extraProjects.filter(x=>new Date(x.created_at||Date.now()).getFullYear()===Number(selectedYear));const totalLei=shown.reduce((a,x)=>a+extraInvoiceRon(x),0), active=shown.filter(x=>x.status==="În curs").length, done=shown.filter(x=>x.status!=="În curs").length;if(xs)xs.innerHTML=`<span class="extraPill">${shown.length} proiecte</span><span class="extraPill"><b>${fmt(totalLei)}</b> valoare totală</span><span class="extraPill">${active} în curs</span><span class="extraPill">${done} închise</span>`;xl.innerHTML=shown.map(x=>{const annex=findExtraAnnex(x);const st=(x.status==="În curs"||!x.status)?"În curs":"Finalizat";const cls=st==="Finalizat"?"finalizat":"";return `<div class="extraGrid"><div><b>${esc(x.project_name||"Proiect fără nume")}</b><div class="wsMuted">${esc(x.client_name||"—")}</div><span class="extraStatus ${cls}">${esc(st)}</span></div><div>${esc(x.category||"Proiect separat")}</div><div>${esc(collabDisplayName(x.collaborator||"VDM"))}</div><div>${esc(x.payment_type||"Preț fix")}</div><div class="extraAmount">${extraCurrency(x)==="EUR"?fmtEur(x.amount):fmt(x.amount)}<div class="wsMuted" style="font-size:11px">${extraCurrency(x)==="EUR"?`Curs EUR <input type="number" min="0.0001" step="0.0001" value="${extraProjectRate(x)}" aria-label="Curs EUR pentru ${esc(x.project_name||"proiect")}" style="width:76px;padding:4px 6px;margin:2px 0;background:#171717;color:#fff;border:1px solid #555;border-radius:6px;font-weight:700" onchange="updateExtraProjectRate('${x.id}',this.value)"><br>`:""}${fmt(extraInvoiceRon(x))} lei<br>Solo: ${esc(x.solo_invoice_number||"necompletat")}</div></div><div class="extraActions"><button class="mini extraDocBtn ${annex?"extraAnnexLinked":""}" onclick="${annex?`printSavedDocument('${annex.id}')`:`generateAnnexFromExtra('${x.id}')`}">${annex?`Anexă ${esc(annex.doc_number||"")} ✓`:"+ Anexă"}</button> <button class="mini" onclick="copyExtraInvoiceAmount('${x.id}')">Copiază suma</button> <button class="mini" onclick="copyExtraInvoiceArticle('${x.id}')">Copiază articol</button> <button class="mini" onclick="saveExtraInvoiceNumber('${x.id}')">Nr. Solo</button> <button class="mini extraFinishBtn ${st!=="În curs"?"done":""}" onclick="advanceExtraStatus('${x.id}')">${st==="În curs"?"✓ Finalizează":"↶ Revino în curs"}</button> <button class="mini extraBillingBtn" type="button" onclick="openExtraBilling('${x.id}')">Facturare</button> <button class="mini" onclick="editExtraProject('${x.id}')">✎</button> <button class="mini" onclick="deleteExtraProject('${x.id}')">×</button></div>${cleanExtraNotes(x.notes)?`<div class="extraNotes wsMuted" style="grid-column:1/-1">${esc(cleanExtraNotes(x.notes))}</div>`:""}</div>`}).join("")||'<div class="wsMuted" style="padding:14px 0">Nu ai proiecte extra în anul selectat.</div>';renderExtraTaxSimulation();renderExtraAnnualSummary(selectedYear);}}
+ const xl=document.getElementById("extraProjectList"), xs=document.getElementById("extraSummary"), xm=document.getElementById("extraSetupMsg"); if(xl){if(!extraProjectsReady){xm.innerHTML='<div class="extraSetup">Pentru Proiecte extra trebuie creată o singură dată tabela <b>extra_projects</b> în Supabase. Folosește fișierul SQL livrat cu această versiune.</div>';xl.innerHTML='';if(xs)xs.innerHTML='';}else{xm.innerHTML='';const yf=document.getElementById("extraYearFilter");const years=[...new Set(extraProjects.map(x=>new Date(x.created_at||Date.now()).getFullYear()))].sort((a,b)=>b-a);if(!years.includes(YEAR))years.push(YEAR);years.sort((a,b)=>b-a);if(yf){const prev=yf.value||String(YEAR);yf.innerHTML='<option value="all">Toate</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');yf.value=["all",...years.map(String)].includes(prev)?prev:String(YEAR)}const selectedYear=yf?.value||String(YEAR);const shown=selectedYear==="all"?extraProjects:extraProjects.filter(x=>new Date(x.created_at||Date.now()).getFullYear()===Number(selectedYear));const totalLei=shown.reduce((a,x)=>a+extraInvoiceRon(x),0), active=shown.filter(x=>x.status==="În curs").length, done=shown.filter(x=>x.status!=="În curs").length;if(xs)xs.innerHTML=`<span class="extraPill">${shown.length} proiecte</span><span class="extraPill"><b>${fmt(totalLei)}</b> valoare totală</span><span class="extraPill">${active} în curs</span><span class="extraPill">${done} închise</span>`;xl.innerHTML=shown.map(x=>{const annex=findExtraAnnex(x);const st=(x.status==="În curs"||!x.status)?"În curs":"Finalizat";const cls=st==="Finalizat"?"finalizat":"";return `<div class="extraGrid"><div><b>${esc(x.project_name||"Proiect fără nume")}</b><div class="wsMuted">${esc(x.client_name||"—")}</div><span class="extraStatus ${cls}">${esc(st)}</span></div><div>${esc(x.category||"Proiect separat")}</div><div>${esc(collabDisplayName(x.collaborator||"VDM"))}</div><div>${esc(x.payment_type||"Preț fix")}</div><div class="extraAmount">${extraCurrency(x)==="EUR"?fmtEur(x.amount):fmt(x.amount)}<div class="wsMuted" style="font-size:11px">${extraCurrency(x)==="EUR"?`Curs EUR <input type="number" min="0.0001" step="0.0001" value="${extraProjectRate(x)}" aria-label="Curs EUR pentru ${esc(x.project_name||"proiect")}" style="width:76px;padding:4px 6px;margin:2px 0;background:#171717;color:#fff;border:1px solid #555;border-radius:6px;font-weight:700" onchange="updateExtraProjectRate('${x.id}',this.value)"><br>`:""}${fmt(extraInvoiceRon(x))} lei<br>Solo: ${esc(x.solo_invoice_number||"necompletat")}</div></div><div class="extraActions"><button class="mini extraDocBtn ${annex?"extraAnnexLinked":""}" onclick="${annex?`printSavedDocument('${annex.id}')`:`generateAnnexFromExtra('${x.id}')`}">${annex?`Anexă ${esc(annex.doc_number||"")} ✓`:"+ Anexă"}</button> <button class="mini" onclick="copyExtraInvoiceAmount('${x.id}')">Copiază suma</button> <button class="mini" onclick="copyExtraInvoiceArticle('${x.id}')">Copiază articol</button> <button class="mini" onclick="saveExtraInvoiceNumber('${x.id}')">Nr. Solo</button> <button class="mini extraFinishBtn ${st!=="În curs"?"done":""}" onclick="advanceExtraStatus('${x.id}')">${st==="În curs"?"✓ Finalizează":"↶ Revino în curs"}</button> <button class="mini extraBillingBtn" type="button" onclick="openExtraBilling('${x.id}')">Facturare</button> <button class="mini gmailLogoBtn" type="button" title="Trimite factura extra prin Gmail" onclick="emailExtraProject('${x.id}')">✉ Gmail</button> <button class="mini" onclick="editExtraProject('${x.id}')">✎</button> <button class="mini" onclick="deleteExtraProject('${x.id}')">×</button></div>${cleanExtraNotes(x.notes)?`<div class="extraNotes wsMuted" style="grid-column:1/-1">${esc(cleanExtraNotes(x.notes))}</div>`:""}</div>`}).join("")||'<div class="wsMuted" style="padding:14px 0">Nu ai proiecte extra în anul selectat.</div>';renderExtraTaxSimulation();renderExtraAnnualSummary(selectedYear);}}
  const tl=document.getElementById("wsTaskList");if(tl)tl.innerHTML=pfaTasks.map(t=>`<div class="wsTaskRow"><label><input type="checkbox" ${t.done?'checked':''} onchange="togglePfaTask('${t.id}',this.checked)"> <b style="${t.done?'text-decoration:line-through;color:#999':''}">${esc(t.title)}</b>${t.due_date?`<span class="wsMuted"> · ${formatRoDate(t.due_date)}</span>`:''}</label><button class="mini" onclick="deletePfaTask('${t.id}')">×</button></div>`).join("")||'<div class="wsMuted">Nu ai notițe manuale.</div>';
  const at=document.getElementById("wsAutoTasks");if(at){const finalized=finalizedRows();const hasInvoice=invoiceHistory.some(x=>Number(x.year)===YEAR&&Number(x.month)===month+1);at.innerHTML=(finalized.length&&!hasInvoice)?`<div class="autoTask">⚠ Factură de emis · Mobiliart · ${names[month]} ${YEAR}<small>Luna are ${finalized.length} lucrări finalizate și nu există încă o factură înregistrată.</small></div>`:''}
  const vals={setTarget:getSetting('target',350000),setRate:getSetting('default_rate',5),setMedium:getSetting('medium',300000),setGood:getSetting('good',320000),setVeryGood:getSetting('very_good',360000)};Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v})}
@@ -2149,6 +2206,56 @@ function openExtraBilling(id){
  openSoloInvoice();
  const msg=`Proiect: ${x.project_name||x.client_name||"Proiect extra"}\nValoare: ${amount} lei\nArticol: ${article}\n\nCopiază suma și articolul din butoanele proiectului și completează factura în Solo.`;
  alert(msg);
+}
+async function emailExtraProject(id){
+ const x=extraProjects.find(v=>String(v.id)===String(id));if(!x)return;
+ if(!pfaWorkspaceReady||!invoiceHistoryReady){alert("Istoricul facturilor și documentele PFA trebuie să fie active pentru trimiterea prin Gmail.");return}
+ let invoiceNo=String(x.solo_invoice_number||"").trim();
+ if(!invoiceNo){invoiceNo=prompt("Introdu numărul facturii deja emise în Solo:",getNextSoloInvoiceNumber(YEAR));if(invoiceNo===null)return;invoiceNo=invoiceNo.trim();if(!invoiceNo){alert("Numărul facturii este obligatoriu.");return}const {error:se}=await sb.from("extra_projects").update({solo_invoice_number:invoiceNo}).eq("id",x.id);if(se){alert("Nu am putut salva numărul Solo: "+se.message);return}x.solo_invoice_number=invoiceNo;}
+ let invoice=invoiceHistory.find(v=>String(v.invoice_number||"").trim()===invoiceNo);
+ if(!invoice){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth()+1, date=`${y}-${String(m).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const amount=extraInvoiceRon(x), article=extraInvoiceArticle(x);
+  const snapshot=[{client:x.client_name||x.project_name||"Proiect extra",room:"Proiect extra",value:amount,bill:amount,note:article}];
+  const {data,error}=await sb.from("invoices").insert({user_id:user.id,year:y,month:m,collaborator:`Proiect extra – ${x.client_name||x.project_name||"Client"}`,invoice_number:invoiceNo,invoice_date:date,amount,work_count:1,article,snapshot}).select().single();
+  if(error){alert("Nu am putut pregăti factura extra în istoricul IMOS: "+error.message);return}
+  invoice=data;await refreshAll();
+  invoice=invoiceHistory.find(v=>String(v.id)===String(data.id))||data;
+ }
+ const attached=pfaFiles.find(v=>String(v.invoice_id)===String(invoice.id)&&String(v.file_name||"").toLowerCase().endsWith(".pdf")&&!!v.storage_path);
+ if(attached){sendInvoiceGmail(invoice.id);return}
+ // Dialog vizibil pentru selectarea facturii Solo. Nu apelăm input.click() după operații async,
+ // deoarece Chrome poate bloca selectorul de fișiere când nu mai există activare directă de la utilizator.
+ const pickModal=document.createElement("div");
+ pickModal.id="extraInvoicePdfPickerModal";
+ pickModal.style.cssText="position:fixed;inset:0;z-index:31000;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:18px";
+ pickModal.innerHTML=`<section role="dialog" aria-modal="true" style="width:min(480px,100%);background:var(--card,#242424);color:var(--ink,#fff);border:1px solid #555;border-radius:16px;padding:22px;box-shadow:0 20px 70px rgba(0,0,0,.45)">
+   <h2 style="margin:0 0 8px;font-size:20px">Atașează factura din Solo</h2>
+   <p style="margin:0 0 16px;color:var(--muted,#aaa);line-height:1.5">Alege PDF-ul facturii deja emise în Solo pentru <b>${String(x.project_name||x.client_name||"proiectul extra").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}</b>. Îl vei putea verifica înainte de trimiterea e-mailului.</p>
+   <input id="extraInvoicePdfFile" type="file" accept="application/pdf,.pdf" style="display:block;width:100%;margin:12px 0 18px;color:inherit">
+   <div style="display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap">
+    <button type="button" id="extraInvoicePdfCancel" style="border:1px solid #888;background:transparent;color:inherit;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer">Anulează</button>
+    <button type="button" id="extraInvoicePdfContinue" style="border:0;background:#d71920;color:#fff;border-radius:9px;padding:10px 14px;font-weight:900;cursor:pointer">Atașează și continuă</button>
+   </div>
+ </section>`;
+ document.body.appendChild(pickModal);
+ const closePick=()=>pickModal.remove();
+ pickModal.querySelector("#extraInvoicePdfCancel").onclick=closePick;
+ pickModal.querySelector("#extraInvoicePdfContinue").onclick=async()=>{
+   const file=pickModal.querySelector("#extraInvoicePdfFile").files?.[0];
+   if(!file){alert("Selectează mai întâi PDF-ul facturii descărcate din Solo.");return}
+   if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){alert("Alege un fișier PDF.");return}
+   const btn=pickModal.querySelector("#extraInvoicePdfContinue");btn.disabled=true;btn.textContent="Se atașează…";
+   try{
+     await uploadPfaFile(file,invoice.id);
+     await refreshAll();
+     const refreshed=pfaFiles.find(v=>String(v.invoice_id)===String(invoice.id)&&String(v.file_name||"").toLowerCase().endsWith(".pdf")&&!!v.storage_path);
+     if(!refreshed){btn.disabled=false;btn.textContent="Atașează și continuă";alert("PDF-ul nu a putut fi găsit în documentele facturii. Verifică secțiunea PFA și încearcă din nou.");return}
+     closePick();
+     sendInvoiceGmail(invoice.id);
+   }catch(e){btn.disabled=false;btn.textContent="Atașează și continuă";alert("Nu am putut atașa PDF-ul: "+(e.message||e))}
+ };
+
 }
 async function deleteExtraProject(id){if(!confirm("Ștergi acest proiect extra?"))return;const {error}=await sb.from("extra_projects").delete().eq("id",id);if(error){alert(error.message);return}await refreshAll();renderWorkspace()}
 function findExtraAnnex(x){return generatedDocs.find(d=>String(d.doc_type||"").toLowerCase().includes("anex")&&String(d.project_name||"").trim().toLowerCase()===String(x.project_name||"").trim().toLowerCase()&&String(d.collaborator||"VDM").toUpperCase()===String(x.collaborator||"VDM").toUpperCase())||null}
