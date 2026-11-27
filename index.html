@@ -1972,7 +1972,7 @@ function renderDocPreview(){
  const type=docVal("docGenType","Anexă proiect"),no=esc(docVal("docGenNo","1")),dateRaw=docVal("docGenDate"),contract=esc(docVal("docGenContract","2222 / 24.04.2024")),project=esc(docVal("docGenProject","[DENUMIRE PROIECT]")),pay=esc(docVal("docGenPay","Preț fix")),amount=Number(docVal("docGenAmount","0"))||0,unit=esc(docVal("docGenUnit")),collab=esc(collabDisplayName(docVal("docGenCollab","VDM"))),clientLegal=collab==="MobiliArt"?"VDM MOBILIART SRL":collab,date=dateRaw?new Date(dateRaw+"T12:00:00").toLocaleDateString("ro-RO"):new Date().toLocaleDateString("ro-RO");
  const pfaLegal=`<b>MICLERU GEORGE PERSOANĂ FIZICĂ AUTORIZATĂ</b>, cu sediul social în B-dul Bucureștii Noi, 136, et. Parter, ap. 5, Sector 1, București, CUI 47425679, nr. de înregistrare la Registrul Comerțului F40/154/2023, denumită în continuare <b>PRESTATOR</b>`;
  const clientParty=collab==="MobiliArt"
-   ? `<b>VDM MOBILIART SRL</b>, cu sediul social în Bd. I. C. Brătianu nr. 28, Constanța, CUI RO33716511, nr. de înregistrare la Registrul Comerțului J13/2055/2014, reprezentată de dl. Mihai Marius, în calitate de administrator, denumită în continuare <b>CLIENT</b>`
+   ? `<b>VDM MOBILIART SRL</b>, cu sediul social în JUD. CONSTANȚA, MUN. CONSTANȚA, BLD. I. C. BRĂTIANU, NR.28, C1-BIROU, CUI RO33716511, nr. de înregistrare la Registrul Comerțului J13/2055/2014, reprezentată de dl. Mihai Marius, în calitate de administrator, denumită în continuare <b>CLIENT</b>`
    : `<b>${clientLegal}</b>, în calitate de Beneficiar`;
  const docCurrency=(document.getElementById("docGenAmount")?.dataset.currency||"RON").toUpperCase();
  const fixedText=docCurrency==="EUR"?fmtEur(amount):fmt(amount);
