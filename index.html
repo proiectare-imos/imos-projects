@@ -1168,7 +1168,7 @@ body[data-theme="dark"] .compactFinalStatus i{background:#31c56b}
 
 <!-- Bara separata „Lucrări în curs” eliminată: valorile sunt afișate în categoria În curs din tabel. -->
 
-<div class="compactSection invoicePanel"><button class="compactHead open" type="button" onclick="toggleCompact('invoiceBody',this)"><span class="compactIcon red">▣</span><strong>Facturare – <span id="invoiceMonthLabel">Septembrie 2026</span></strong><span class="compactMeta">Total: <b id="invoiceCompactTotal">0 lei</b> · Rămâne în mână: <b class="invoiceNetHeader" id="invoiceNetCompact">0 lei</b></span><span class="chev open">⌃</span></button><div id="invoiceBody" class="compactBody"><div id="invoiceList" class="invoiceList"></div><div class="invoiceHint">Textul pentru factură include automat luna selectată.</div><div class="monthlyAssistantActions billingActions"><button type="button" class="assistantSoloBtn" onclick="openSoloInvoice()"><span class="brandMark soloMark">SOLO</span> Emite factura în Solo</button><button type="button" onclick="copySoloInvoiceField('article')">Copiază articolul</button><button type="button" onclick="copySoloInvoiceField('amount')">Copiază suma</button><button type="button" onclick="document.getElementById('worksPanel')?.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById('worksBody')?.classList.remove('collapsed')">Vezi lucrările lunii</button></div></div></div>
+<div class="compactSection invoicePanel"><button class="compactHead open" type="button" onclick="toggleCompact('invoiceBody',this)"><span class="compactIcon red">▣</span><strong>Facturare – <span id="invoiceMonthLabel">Septembrie 2026</span></strong><span class="compactMeta">Total: <b id="invoiceCompactTotal">0 lei</b> · Rămâne în mână: <b class="invoiceNetHeader" id="invoiceNetCompact">0 lei</b></span><span class="chev open">⌃</span></button><div id="invoiceBody" class="compactBody"><div id="invoiceList" class="invoiceList"></div><div class="invoiceHint">Textul pentru factură include automat luna selectată.</div><div class="monthlyAssistantActions billingActions"><button type="button" class="assistantSoloBtn" onclick="openSoloInvoice()"><span class="brandMark soloMark">SOLO</span> Emite factura în Solo</button><button type="button" onclick="copySoloInvoiceField('article')">Copiază articolul</button><button type="button" onclick="copySoloInvoiceField('amount')">Copiază suma</button><button type="button" onclick="openWorksPanel('finalized')">Vezi lucrările lunii</button></div></div></div>
 
 <div class="compactSection invoicePanel" id="invoiceHistoryPanel"><button class="compactHead open" type="button" onclick="toggleCompact('invoiceHistoryBody',this)"><span class="compactIcon violet">▤</span><strong>Istoric facturi</strong><span class="compactBadge redBadge" id="historyCountBadge">0 facturi</span><span class="compactMeta"><b id="historyTotalBadge">0 lei</b></span><span class="chev open">⌃</span></button><div id="invoiceHistoryBody" class="compactBody"><div id="invoiceHistoryList" class="invoiceHistoryList"><div class="historyEmpty">Se încarcă…</div></div></div></div>
 <div class="compactSection invoicePanel" id="emailHistoryPanel"><button class="compactHead open" type="button" onclick="toggleCompact('emailHistoryBody',this)"><span class="compactIcon blue">✉</span><strong>Istoric e-mailuri</strong><span class="compactBadge" id="emailHistoryCount">0 mesaje</span><span class="chev open">⌃</span></button><div id="emailHistoryBody" class="compactBody"><div id="emailHistoryList" class="invoiceHistoryList"><div class="historyEmpty">Se încarcă…</div></div></div></div>
@@ -1775,13 +1775,27 @@ async function deleteInvoice(invoiceId){
   await refreshAll();renderInvoiceHistory();renderEmailHistory();updateCompactSummary();renderExtraDashboard();
   alert("Înregistrarea facturii a fost ștearsă din IMOS Projects. Factura din Solo nu a fost afectată."+(ee?"\n\nAtenție: istoricul e-mailurilor nu a putut fi desprins din cauza permisiunilor; verifică-l în secțiunea Istoric e-mailuri.":""));
 }
+let emailHistoryView="real";
+function setEmailHistoryView(view){emailHistoryView=view==="tests"?"tests":"real";renderEmailHistory()}
+async function deleteEmailHistoryItem(id){
+  const item=emailHistory.find(x=>String(x.id)===String(id));
+  if(!item)return;
+  if(!confirm("Ștergi această înregistrare din istoricul IMOS Projects? E-mailul din Gmail și atașamentele nu vor fi șterse."))return;
+  const {error}=await sb.from("email_send_history").delete().eq("id",id).eq("user_id",user.id);
+  if(error){alert("Nu am putut șterge înregistrarea: "+(error.message||"eroare"));return}
+  emailHistory=emailHistory.filter(x=>String(x.id)!==String(id));renderEmailHistory();
+}
 function renderEmailHistory(){
   const list=document.getElementById("emailHistoryList"), badge=document.getElementById("emailHistoryCount");
-  if(badge)badge.textContent=emailHistory.length+" mesaje";
   if(!list)return;
+  const ownEmail="george.micleru@gmail.com";
+  const tests=emailHistory.filter(x=>String(x.recipient||"").trim().toLowerCase()===ownEmail);
+  const real=emailHistory.filter(x=>String(x.recipient||"").trim().toLowerCase()!==ownEmail);
+  const rows=emailHistoryView==="tests"?tests:real;
+  if(badge)badge.textContent=emailHistory.length+" mesaje";
   if(!emailHistoryReady){const e=window.emailHistoryError||{};list.innerHTML='<div class="historyEmpty"><b>Eroare la încărcarea istoricului:</b> '+esc(e.message||"Eroare necunoscută")+'</div>';return}
-  if(!emailHistory.length){list.innerHTML='<div class="historyEmpty">Nu există încă e-mailuri înregistrate.</div>';return}
-  list.innerHTML=emailHistory.map(x=>`<div class="historyRow" style="grid-template-columns:1.1fr 1.4fr 1fr auto"><div><div class="historyMain">${esc(x.invoice_number||"Factura")}</div><div class="historyMeta">${esc(x.subject||"")}</div></div><div>${esc(x.recipient||"—")}<div class="historyMeta">${x.created_at?new Date(x.created_at).toLocaleString("ro-RO"):"—"}</div></div><div><b style="color:${x.status==="sent"?"#15966a":"#d71920"}">${x.status==="sent"?"Trimis":"Eroare"}</b>${x.error_message?'<div class="historyMeta">'+esc(x.error_message)+'</div>':''}</div><div>${x.message_id?'<span title="ID Gmail salvat">ID Gmail ✓</span>':'—'}</div></div>`).join("");
+  list.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px"><button type="button" class="btn" onclick="setEmailHistoryView('real')" style="${emailHistoryView==='real'?'border-color:#e11d2e;color:#fff':''}">E-mailuri reale (${real.length})</button><button type="button" class="btn" onclick="setEmailHistoryView('tests')" style="${emailHistoryView==='tests'?'border-color:#e11d2e;color:#fff':''}">Teste (${tests.length})</button></div>`+
+    (rows.length?rows.map(x=>`<div class="historyRow" style="grid-template-columns:1.1fr 1.4fr 1fr auto auto"><div><div class="historyMain">${esc(x.invoice_number||"Factura")}</div><div class="historyMeta">${esc(x.subject||"")}</div></div><div>${esc(x.recipient||"—")}<div class="historyMeta">${x.created_at?new Date(x.created_at).toLocaleString("ro-RO"):"—"}</div></div><div><b style="color:${x.status==="sent"?"#15966a":"#d71920"}">${x.status==="sent"?"Trimis":"Eroare"}</b>${x.error_message?'<div class="historyMeta">'+esc(x.error_message)+'</div>':''}</div><div>${x.message_id?'<span title="ID Gmail salvat">ID Gmail ✓</span>':'—'}</div><div><button type="button" class="btn" onclick="deleteEmailHistoryItem('${String(x.id).replace(/'/g,"\\'")}')" title="Șterge doar înregistrarea din aplicație">Șterge</button></div></div>`).join(""):'<div class="historyEmpty">Nu există mesaje în această categorie.</div>');
 }
 function closeInvoiceEmailPreview(){
   const modal=document.getElementById("invoiceEmailPreview");
