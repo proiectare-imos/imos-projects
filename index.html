@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IMOS Projects v16.78</title>
+<title>IMOS Projects v16.80</title>
 <!-- v16.30: generator documente PFA + preview A4 -->
 <!-- v16.60: Lucrările lunii este deschis implicit la accesarea aplicației -->
 <!-- v16.61: toate cardurile tip acordeon deschise implicit; valori negative pentru ajustări -->
@@ -11,6 +11,7 @@
 <!-- v16.77: butoanele Asistentului lunar navighează la Proiecte înainte de filtrare -->
 <!-- v16.79: butonul PDF din istoricul facturilor deschide doar PDF-ul facturii, nu anexa -->
 <!-- v16.78: suma lunară copiată în format zecimal cu punct, compatibil Solo -->
+<!-- v16.80: facturare simplificată, istoric facturi la vedere, mesaj Gmail fără diacritice, copiere tabel stabilizată -->
 <style>
 :root{--nav:#090909;--bg:#f5f5f5;--card:#fff;--ink:#111;--muted:#686868;--line:#e3e3e3;--blue:#d71920;--green:#d71920}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -1582,25 +1583,24 @@ async function copyMobiliartExcel(){
   const rows=finalizedRows();
   if(!rows.length){alert("Nu există lucrări finalizate pentru luna selectată.");return}
   const total=rows.reduce((sum,r)=>sum+(Number(r.value)||0),0);
-  const escCell=v=>String(v??"").replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const money=v=>{const n=Number(v||0);return n.toLocaleString('ro-RO',{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})};
-  const border='border:1px solid #222;padding:4px 6px;font-family:Arial,sans-serif;font-size:10pt;';
+  // TSV simplu, cu valori numerice fara separator de mii; Excel le poate interpreta ca numere.
+  const number=v=>(Number(v)||0).toFixed(2).replace(".",",");
   const monthLabel=`${names[month]} ${YEAR}`;
-  const monthRow=`<tr><td colspan="3" style="${border}background-color:#ffff00;text-align:center;font-weight:bold;">${monthLabel}</td></tr>`;
-  const body=rows.map(r=>`<tr><td style="${border}">${escCell(r.client)}</td><td style="${border}">${escCell(r.room)}</td><td style="${border}text-align:right;">${money(r.value)}</td></tr>`).join('');
-  const totalRow=`<tr><td style="${border}font-weight:bold;">TOTAL</td><td style="${border}"></td><td style="${border}font-weight:bold;text-align:right;">${money(total)}</td></tr>`;
-  const html=`<table style="border-collapse:collapse;"><tbody>${monthRow}${body}${totalRow}</tbody></table>`;
-  const plain=[monthLabel,...rows.map(r=>[r.client,r.room,money(r.value)].join('\t')),["TOTAL",'',money(total)].join('\t')].join('\r\n');
+  const cells=[
+    [monthLabel,"","","","","","","",""],
+    ...rows.map(r=>[String(r.client||""),String(r.room||""),number(r.value),"","","","","",""]),
+    ["TOTAL","",number(total),"","","","","",""]
+  ];
+  const tsv=cells.map(row=>row.map(v=>String(v).replace(/[\t\r\n]+/g," ")).join("\t")).join("\r\n");
   try{
-    if(navigator.clipboard&&window.ClipboardItem){
-      await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);
-    }else{await navigator.clipboard.writeText(plain)}
-    alert(`Tabelul MobiliArt pentru ${monthLabel} a fost copiat. Lipește-l în Google Sheets/Excel cu Ctrl+V.\n\n${rows.length} lucrări · Total: ${fmt(total)}`);
+    if(navigator.clipboard?.writeText) await navigator.clipboard.writeText(tsv);
+    else throw new Error("Clipboard API indisponibil");
+    alert(`Tabelul MobiliArt pentru ${monthLabel} a fost copiat. Lipește-l în prima celulă de date din Excel cu Ctrl+V.\n\n${rows.length} lucrări · Total: ${fmt(total)}`);
   }catch(e){
-    const area=document.createElement('textarea');area.value=plain;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();
+    const area=document.createElement('textarea');area.value=tsv;area.style.position='fixed';area.style.left='-9999px';document.body.appendChild(area);area.focus();area.select();
     const ok=document.execCommand('copy');area.remove();
-    if(ok)alert('Datele au fost copiate. Lipește-le în Google Sheets/Excel cu Ctrl+V. Pentru păstrarea formatării, folosește butonul într-o pagină HTTPS.');
-    else prompt('Copiază conținutul și lipește-l în Excel:',plain);
+    if(ok)alert('Tabelul a fost copiat. Lipește-l în Excel cu Ctrl+V.');
+    else prompt('Copiază tabelul și lipește-l în Excel:',tsv);
   }
 }
 function render(){
@@ -1805,11 +1805,11 @@ function sendInvoiceGmail(invoiceId){
     <p style="font-size:13px;color:var(--muted,#666);margin:0 0 16px">E-mailul NU se trimite când deschizi această fereastră. Se trimite numai după ce apeși „Trimite acum”.</p>
     <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailTo">Către</label><input id="invoiceEmailTo" type="email" value="contabilitate@mobiliart.ro" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
     <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailSubject">Subiect (poți modifica titlul)</label><input id="invoiceEmailSubject" type="text" required style="width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit">
-    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailBody">Mesaj</label><textarea id="invoiceEmailBody" rows="5" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit;line-height:1.5">Bună ziua,
+    <label style="display:block;font-size:12px;font-weight:800;margin:12px 0 5px" for="invoiceEmailBody">Mesaj</label><textarea id="invoiceEmailBody" rows="5" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid #ccc;border-radius:9px;padding:11px;font:inherit;line-height:1.5">Buna ziua,
 
-Vă transmit atașată factura aferentă serviciilor de proiectare mobilier.
+Va transmit atasata factura aferenta serviciilor de proiectare mobilier.
 
-Mulțumesc!</textarea>
+Multumesc!</textarea>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:12px;margin-top:14px"><span style="font-size:23px">📎</span><div style="flex:1;min-width:180px"><b>Factura PDF</b><div id="invoiceEmailFileName" style="font-size:12px;color:var(--muted,#666);margin-top:3px;overflow-wrap:anywhere"></div></div><button type="button" id="invoiceEmailOpenPdf" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer">Vezi PDF</button><button type="button" id="invoiceEmailReplacePdf" style="border:1px solid #d71920;background:transparent;color:#d71920;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer">Schimbă factura PDF</button><input id="invoiceEmailPdfPicker" type="file" accept="application/pdf,.pdf" hidden></div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:12px;margin-top:9px"><span style="font-size:23px">📎</span><div style="flex:1;min-width:180px"><b>Documente suplimentare (ex. anexă)</b><div id="invoiceEmailExtraFiles" style="font-size:12px;color:var(--muted,#666);margin-top:3px;overflow-wrap:anywhere">Nu ai adăugat documente suplimentare.</div></div><button type="button" id="invoiceEmailAddPdf" style="border:1px solid #15966a;background:transparent;color:#15966a;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer">+ Adaugă PDF</button><input id="invoiceEmailExtraPdfPicker" type="file" accept="application/pdf,.pdf" multiple hidden></div>
     <div style="display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:20px"><button type="button" id="invoiceEmailCancel" style="border:1px solid #ccc;background:transparent;color:inherit;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer">Anulează</button><button type="button" id="invoiceEmailSend" style="border:0;background:#d71920;color:#fff;border-radius:9px;padding:11px 16px;font-weight:900;cursor:pointer">Trimite acum</button></div>
@@ -2161,7 +2161,13 @@ function renderWorkspace(){if(!pfaWorkspaceReady)return;const fl=document.getEle
 async function uploadPfaFile(file,invoiceId=null){if(!file)return;if(!pfaWorkspaceReady){alert("Activează mai întâi secțiunea PFA în Supabase.");return}setLoading(true);const safe=file.name.replace(/[^\w.\-() ]+/g,"_");const path=`${user.id}/pfa/${invoiceId?'facturi':'documente'}/${Date.now()}_${safe}`;const {error:ue}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});if(ue){alert(ue.message);setLoading(false);return}const cat=invoiceId?"Factură SOLO":(document.getElementById("pfaFileCategory")?.value||"Document");const label=invoiceId?(invoiceHistory.find(x=>x.id===invoiceId)?.invoice_number||file.name):(document.getElementById("pfaFileLabel")?.value.trim()||file.name);const {error}=await sb.from("pfa_files").insert({user_id:user.id,category:cat,label,file_name:file.name,storage_path:path,invoice_id:invoiceId});if(error){await sb.storage.from(BUCKET).remove([path]);alert(error.message)}await refreshAll();setLoading(false);renderWorkspace()}
 async function openPfaFile(id){const f=pfaFiles.find(x=>x.id===id);if(!f)return;const {data:s,error}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,120);if(error){alert(error.message);return}window.open(s.signedUrl,"_blank","noopener")}
 async function deletePfaFile(id){const f=pfaFiles.find(x=>x.id===id);if(!f||!confirm("Ștergi documentul?"))return;await sb.storage.from(BUCKET).remove([f.storage_path]);const {error}=await sb.from("pfa_files").delete().eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
-function invoicePdfAction(invoiceId){const f=pfaFiles.find(x=>String(x.invoice_id)===String(invoiceId)&&String(x.category||"").toLowerCase().includes("factur")&&String(x.file_name||"").toLowerCase().endsWith(".pdf")&&!!x.storage_path);if(f){openPfaFile(f.id);return}const inp=document.createElement("input");inp.type="file";inp.accept="application/pdf,.pdf";inp.onchange=()=>uploadPfaFile(inp.files[0],invoiceId);inp.click()}
+function invoicePdfAction(invoiceId){
+  // Selectam explicit factura, nu primul PDF asociat (care poate fi anexa).
+  const invoiceFiles=pfaFiles.filter(x=>String(x.invoice_id)===String(invoiceId)&&String(x.file_name||"").toLowerCase().endsWith(".pdf")&&!!x.storage_path);
+  const f=invoiceFiles.find(x=>/factur/i.test(String(x.category||""))||/factur/i.test(String(x.label||"")))||invoiceFiles.find(x=>/factur/i.test(String(x.file_name||"")));
+  if(f){openPfaFile(f.id);return}
+  const inp=document.createElement("input");inp.type="file";inp.accept="application/pdf,.pdf";inp.onchange=()=>uploadPfaFile(inp.files[0],invoiceId);inp.click();
+}
 async function addPfaTask(){const t=prompt("Ce ai de rezolvat?");if(!t||!t.trim())return;const d=prompt("Termen (AAAA-LL-ZZ) — opțional:","");const payload={user_id:user.id,title:t.trim(),done:false};if(d&&d.trim())payload.due_date=d.trim();const {error}=await sb.from("pfa_tasks").insert(payload);if(error)alert(error.message);await refreshAll();renderWorkspace()}
 
 
@@ -2788,7 +2794,7 @@ body[data-imos-route-workspace] #workspaceOverlay .workspaceTop{min-height:72px}
 
   const billingTabs=document.createElement('div');
   billingTabs.className='imosBillingTabs';billingTabs.setAttribute('role','tablist');billingTabs.setAttribute('aria-label','Secțiuni de facturare');
-  billingTabs.innerHTML='<button type="button" data-billing-view="monthly">Facturare lunară</button><button type="button" data-billing-view="history">Istoric facturi</button><button type="button" data-billing-view="emails">Istoric e-mailuri</button><button type="button" data-billing-view="annual">Evoluție anuală</button>';
+  billingTabs.innerHTML='<button type="button" data-billing-view="monthly">Facturare lunară</button><button type="button" data-billing-view="emails">Istoric e-mailuri</button><button type="button" data-billing-view="annual">Evoluție anuală</button>';
   billing.querySelector('.imosRouteHead').after(billingTabs);
   const projectTabs=document.createElement('div');
   projectTabs.className='imosBillingTabs';projectTabs.setAttribute('role','tablist');projectTabs.setAttribute('aria-label','Secțiuni de proiecte');
@@ -2814,8 +2820,9 @@ body[data-imos-route-workspace] #workspaceOverlay .workspaceTop{min-height:72px}
     if(dashboardSummary)dashboardSummary.after(monthlyAssistant);
     else dashboard.append(monthlyAssistant);
   }
-  addBillingPanel('monthly',[monthlyInvoice]);
-  addBillingPanel('history',[invoiceHistory]);
+  addBillingPanel('monthly',[monthlyInvoice,invoiceHistory]);
+  if(invoiceHistory){const h=invoiceHistory.querySelector('.compactHead strong');if(h)h.textContent='Facturi emise – PDF, centralizator si Gmail';}
+  addBillingPanel('history',[]);
   addBillingPanel('emails',[emailHistory]);
   addBillingPanel('annual',[annualPanel]);
 
@@ -2860,7 +2867,7 @@ body[data-imos-route-workspace] #workspaceOverlay .workspaceTop{min-height:72px}
   billingTabs.addEventListener('click',event=>{
     const button=event.target.closest('[data-billing-view]');if(!button)return;
     const view=button.dataset.billingView;showBillingView(view);
-    const route=view==='monthly'?'billing-monthly':view==='history'?'billing-history':view==='emails'?'billing-emails':'billing-annual';
+    const route=view==='monthly'?'billing-monthly':view==='emails'?'billing-emails':'billing-annual';
     history.replaceState(null,'','#'+route);
   });
   projectTabs.addEventListener('click',event=>{
