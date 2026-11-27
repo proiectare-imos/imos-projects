@@ -2,13 +2,15 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IMOS Projects v16.77</title>
+<title>IMOS Projects v16.78</title>
 <!-- v16.30: generator documente PFA + preview A4 -->
 <!-- v16.60: Lucrările lunii este deschis implicit la accesarea aplicației -->
 <!-- v16.61: toate cardurile tip acordeon deschise implicit; valori negative pentru ajustări -->
 <!-- v16.62: Asistentul lunar mutat în Home / Dashboard -->
 <!-- v16.63: proiectele extra Încasat pot fi readuse la În curs -->
 <!-- v16.77: butoanele Asistentului lunar navighează la Proiecte înainte de filtrare -->
+<!-- v16.79: butonul PDF din istoricul facturilor deschide doar PDF-ul facturii, nu anexa -->
+<!-- v16.78: suma lunară copiată în format zecimal cu punct, compatibil Solo -->
 <style>
 :root{--nav:#090909;--bg:#f5f5f5;--card:#fff;--ink:#111;--muted:#686868;--line:#e3e3e3;--blue:#d71920;--green:#d71920}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -2159,7 +2161,7 @@ function renderWorkspace(){if(!pfaWorkspaceReady)return;const fl=document.getEle
 async function uploadPfaFile(file,invoiceId=null){if(!file)return;if(!pfaWorkspaceReady){alert("Activează mai întâi secțiunea PFA în Supabase.");return}setLoading(true);const safe=file.name.replace(/[^\w.\-() ]+/g,"_");const path=`${user.id}/pfa/${invoiceId?'facturi':'documente'}/${Date.now()}_${safe}`;const {error:ue}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});if(ue){alert(ue.message);setLoading(false);return}const cat=invoiceId?"Factură SOLO":(document.getElementById("pfaFileCategory")?.value||"Document");const label=invoiceId?(invoiceHistory.find(x=>x.id===invoiceId)?.invoice_number||file.name):(document.getElementById("pfaFileLabel")?.value.trim()||file.name);const {error}=await sb.from("pfa_files").insert({user_id:user.id,category:cat,label,file_name:file.name,storage_path:path,invoice_id:invoiceId});if(error){await sb.storage.from(BUCKET).remove([path]);alert(error.message)}await refreshAll();setLoading(false);renderWorkspace()}
 async function openPfaFile(id){const f=pfaFiles.find(x=>x.id===id);if(!f)return;const {data:s,error}=await sb.storage.from(BUCKET).createSignedUrl(f.storage_path,120);if(error){alert(error.message);return}window.open(s.signedUrl,"_blank","noopener")}
 async function deletePfaFile(id){const f=pfaFiles.find(x=>x.id===id);if(!f||!confirm("Ștergi documentul?"))return;await sb.storage.from(BUCKET).remove([f.storage_path]);const {error}=await sb.from("pfa_files").delete().eq("id",id);if(error)alert(error.message);await refreshAll();renderWorkspace()}
-function invoicePdfAction(invoiceId){const f=pfaFiles.find(x=>x.invoice_id===invoiceId);if(f){openPfaFile(f.id);return}const inp=document.createElement("input");inp.type="file";inp.accept="application/pdf";inp.onchange=()=>uploadPfaFile(inp.files[0],invoiceId);inp.click()}
+function invoicePdfAction(invoiceId){const f=pfaFiles.find(x=>String(x.invoice_id)===String(invoiceId)&&String(x.category||"").toLowerCase().includes("factur")&&String(x.file_name||"").toLowerCase().endsWith(".pdf")&&!!x.storage_path);if(f){openPfaFile(f.id);return}const inp=document.createElement("input");inp.type="file";inp.accept="application/pdf,.pdf";inp.onchange=()=>uploadPfaFile(inp.files[0],invoiceId);inp.click()}
 async function addPfaTask(){const t=prompt("Ce ai de rezolvat?");if(!t||!t.trim())return;const d=prompt("Termen (AAAA-LL-ZZ) — opțional:","");const payload={user_id:user.id,title:t.trim(),done:false};if(d&&d.trim())payload.due_date=d.trim();const {error}=await sb.from("pfa_tasks").insert(payload);if(error)alert(error.message);await refreshAll();renderWorkspace()}
 
 
@@ -2306,7 +2308,7 @@ function renderExtraDashboard(){
 function soloInvoiceDescription(){return `Servicii de proiectare mobilier aferente lunii ${names[month].toLowerCase()} ${YEAR}, conform contractului și actului adițional`;}
 function soloInvoiceAmount(){return finalizedRows().reduce((sum,r)=>sum+rowBill(r),0);}
 async function copySoloInvoiceField(field){
-  const value=field==='article'?soloInvoiceDescription():soloInvoiceAmount().toFixed(2).replace('.',',');
+  const value=field==='article'?soloInvoiceDescription():soloInvoiceAmount().toFixed(2);
   const label=field==='article'?'Articolul':'Suma';
   try{
     await navigator.clipboard.writeText(value);
